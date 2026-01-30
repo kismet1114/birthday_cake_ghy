@@ -462,30 +462,9 @@
       0% { transform: translate(0,0) scale(1); opacity: 1; }
       100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
     }
-
-    /* 音效开关提示 */
-    .sound-hint {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(255,255,255,0.9);
-      padding: 10px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      color: #666;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
   </style>
 </head>
 <body>
-  <div class="sound-hint" id="soundHint">
-    <span>🔊</span> 点击任意处开启音效
-  </div>
-
   <div class="main-container" id="makeStage">
     <h1>🎂 奶糕的生日派对蛋糕制作</h1>
     
@@ -568,158 +547,7 @@
   <div class="celebration" id="celebration"></div>
 
   <script>
-    // 音频上下文（需要用户交互后初始化）
-    let audioCtx = null;
-    let soundEnabled = false;
-
-    // 初始化音频（必须用户点击后调用）
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        soundEnabled = true;
-        document.getElementById('soundHint').style.display = 'none';
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    // 播放音效函数
-    function playSound(type) {
-      if (!soundEnabled || !audioCtx) return;
-      
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-      
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      const now = audioCtx.currentTime;
-      
-      switch(type) {
-        case 'fluff': // 拍打蓬松 - 低音"咚"
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(150, now);
-          osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-          osc.start(now);
-          osc.stop(now + 0.15);
-          break;
-          
-        case 'fluff-high': // 连击高音 - 铃铛声
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(800, now);
-          osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-          osc.start(now);
-          osc.stop(now + 0.2);
-          break;
-          
-        case 'cream': // 挤奶油 - 短促"噗"
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(400, now);
-          osc.frequency.linearRampToValueAtTime(600, now + 0.05);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-          osc.start(now);
-          osc.stop(now + 0.1);
-          break;
-          
-        case 'fruit': // 放水果 - 清脆"啪"
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(1200, now);
-          osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-          // 添加高频谐波
-          const osc2 = audioCtx.createOscillator();
-          const gain2 = audioCtx.createGain();
-          osc2.connect(gain2);
-          gain2.connect(audioCtx.destination);
-          osc2.type = 'square';
-          osc2.frequency.setValueAtTime(2400, now);
-          gain2.gain.setValueAtTime(0.05, now);
-          gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-          osc2.start(now);
-          osc2.stop(now + 0.05);
-          osc.start(now);
-          osc.stop(now + 0.1);
-          break;
-          
-        case 'candle': // 插蜡烛 - 木质"咔"
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(200, now);
-          osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(1000, now);
-          filter.frequency.linearRampToValueAtTime(300, now + 0.1);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-          osc.start(now);
-          osc.stop(now + 0.15);
-          break;
-          
-        case 'fire': // 点火 - "呼"+高频
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(100, now);
-          osc.frequency.linearRampToValueAtTime(300, now + 0.15);
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(800, now);
-          filter.Q.setValueAtTime(5, now);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-          // 噪音模拟火焰
-          const bufferSize = audioCtx.sampleRate * 0.2;
-          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-          }
-          const noise = audioCtx.createBufferSource();
-          noise.buffer = buffer;
-          const noiseGain = audioCtx.createGain();
-          noise.connect(noiseGain);
-          noiseGain.connect(audioCtx.destination);
-          noiseGain.gain.setValueAtTime(0.1, now);
-          noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-          noise.start(now);
-          osc.start(now);
-          osc.stop(now + 0.2);
-          break;
-          
-        case 'pop': // 装饰 - 轻"啵"
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(600, now);
-          osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-          osc.start(now);
-          osc.stop(now + 0.1);
-          break;
-          
-        case 'complete': // 完成 - 庆祝和弦
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => { // C5 E5 G5 C6
-            const oscC = audioCtx.createOscillator();
-            const gainC = audioCtx.createGain();
-            oscC.connect(gainC);
-            gainC.connect(audioCtx.destination);
-            oscC.type = 'sine';
-            oscC.frequency.value = freq;
-            gainC.gain.setValueAtTime(0, now + i * 0.1);
-            gainC.gain.linearRampToValueAtTime(0.1, now + i * 0.1 + 0.05);
-            gainC.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.5);
-            oscC.start(now + i * 0.1);
-            oscC.stop(now + i * 0.1 + 0.5);
-          });
-          break;
-      }
-    }
-
-    // 步骤配置
+    // 步骤配置：左边指引图 + 右边工作图 + 说明
     const steps = [
       { 
         guide: 'images/1.jpg', 
@@ -739,7 +567,7 @@
       },
       { 
         guide: 'images/3.jpg', 
-        work: 'images/2.jpg',
+        work: 'images/2.jpg', // 保持2.jpg作为工作台
         instruction: '第三步：添加水果装饰',
         hint: '点击任意位置添加水果（草莓、樱桃、蓝莓、葡萄）',
         guideText: '挑选新鲜水果点缀蛋糕，让色彩更丰富',
@@ -747,7 +575,7 @@
       },
       { 
         guide: 'images/4.jpg', 
-        work: 'images/2.jpg',
+        work: 'images/2.jpg', // 保持2.jpg作为工作台
         instruction: '第四步：插上生日蜡烛',
         hint: '点击添加蜡烛（最多5根）',
         guideText: '插上蜡烛准备庆祝，最多可以放5根哦',
@@ -755,7 +583,7 @@
       },
       { 
         guide: 'images/5.jpg', 
-        work: 'images/2.jpg',
+        work: 'images/2.jpg', // 保持2.jpg作为工作台
         instruction: '第五步：点燃蜡烛！',
         hint: '点击蜡烛点燃它们',
         guideText: '点亮蜡烛，准备唱生日歌',
@@ -763,7 +591,7 @@
       },
       { 
         guide: 'images/6.jpg', 
-        work: 'images/2.jpg',
+        work: 'images/2.jpg', // 最后一步工作台显示玩家制作的蛋糕（带装饰）
         instruction: '第六步：自由装饰 & 完成！',
         hint: '拖拽下方表情装饰蛋糕，然后点击完成',
         guideText: '最后点缀，让蛋糕更完美！',
@@ -775,8 +603,7 @@
     let fluffiness = 0;
     let candleCount = 0;
     let isDrawing = false;
-    let decorations = [];
-    let combo = 0;
+    let decorations = []; // 记录所有装饰
     
     const guideImage = document.getElementById('guideImage');
     const workImage = document.getElementById('workImage');
@@ -793,10 +620,6 @@
 
     const emojis = ['🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐'];
 
-    // 全局点击初始化音频
-    document.addEventListener('click', initAudio, { once: true });
-    document.addEventListener('touchstart', initAudio, { once: true });
-
     function init() {
       updateStep();
     }
@@ -804,17 +627,21 @@
     function updateStep() {
       const step = steps[currentStep];
       
+      // 更新指示器
       document.querySelectorAll('.step-dot').forEach((dot, idx) => {
         dot.classList.remove('active', 'completed');
         if (idx < currentStep) dot.classList.add('completed');
         if (idx === currentStep) dot.classList.add('active');
       });
 
+      // 更新左边指引区
       guideImage.src = step.guide;
       guideText.textContent = step.guideText;
       
+      // 更新右边工作区
       if (currentStep === 5) {
-        workImage.style.display = 'none';
+        // 最后一步：工作区显示玩家制作的蛋糕（保留所有装饰）
+        workImage.style.display = 'none'; // 隐藏基础图，显示纯装饰层+背景
         cakeArea.style.background = 'linear-gradient(135deg, #fff9fc, #fff0f5)';
       } else {
         workImage.src = step.work;
@@ -824,8 +651,10 @@
       
       instruction.innerHTML = `${step.instruction}<div class="instruction-hint">${step.hint}</div>`;
       
+      // 重置交互
       resetInteractions();
       
+      // 步骤特定设置
       if (currentStep === 0) {
         fluffMeter.style.display = 'block';
         setupFluffInteraction();
@@ -839,6 +668,7 @@
       if (currentStep === 4) setupLightInteraction();
       if (currentStep === 5) setupDecorateInteraction();
       
+      // 按钮状态
       if (currentStep === 5) {
         nextBtn.style.display = 'none';
         finishBtn.style.display = 'inline-block';
@@ -864,23 +694,15 @@
       cakeArea.onclick = null;
     }
 
-    // 第一步：拍打蓬松（带连击音效）
+    // 第一步：蓬松互动
     function setupFluffInteraction() {
       let isPressed = false;
-      combo = 0;
+      let combo = 0;
       
       const startPress = (e) => {
         if (fluffiness >= 100) return;
         isPressed = true;
         workImage.classList.add('squashed');
-        
-        combo++;
-        if (combo > 1 && combo % 3 === 0) {
-          playSound('fluff-high'); // 连击高音
-        } else {
-          playSound('fluff'); // 普通低音
-        }
-        
         createParticles(e, 'flour');
       };
       
@@ -891,11 +713,12 @@
         
         fluffiness = Math.min(fluffiness + 10, 100);
         fluffFill.style.width = fluffiness + '%';
+        
+        // 弹跳动画
         workImage.style.transform = `scale(${0.9 + fluffiness/100 * 0.2})`;
         
         if (fluffiness >= 100) {
           showFeedback('完美蓬松！✨');
-          playSound('complete');
           createConfetti();
         }
       };
@@ -906,7 +729,7 @@
       document.addEventListener('touchend', endPress);
     }
 
-    // 第二步：涂抹奶油
+    // 第二步：涂抹奶油（细小白点）
     function setupCreamInteraction() {
       isDrawing = false;
       let lastTime = 0;
@@ -916,7 +739,7 @@
         e.preventDefault();
         
         const now = Date.now();
-        if (now - lastTime < 50) return;
+        if (now - lastTime < 40) return; // 节流
         lastTime = now;
         
         const rect = cakeArea.getBoundingClientRect();
@@ -930,22 +753,19 @@
         
         decorLayer.appendChild(cream);
         decorations.push(cream);
-        
-        // 每隔一段时间播放噗噗声
-        if (Math.random() > 0.7) playSound('cream');
       };
       
-      cakeArea.onmousedown = () => { isDrawing = true; playSound('cream'); };
+      cakeArea.onmousedown = () => isDrawing = true;
       cakeArea.onmousemove = draw;
       cakeArea.onmouseup = () => isDrawing = false;
       cakeArea.onmouseleave = () => isDrawing = false;
       
-      cakeArea.ontouchstart = (e) => { e.preventDefault(); isDrawing = true; playSound('cream'); };
+      cakeArea.ontouchstart = (e) => { e.preventDefault(); isDrawing = true; };
       cakeArea.ontouchmove = (e) => { e.preventDefault(); draw(e); };
       cakeArea.ontouchend = () => isDrawing = false;
     }
 
-    // 第三步：水果（4种）
+    // 第三步：水果（只保留4种）
     function setupFruitInteraction() {
       const fruits = ['🍓', '🍒', '🫐', '🍇'];
       
@@ -963,8 +783,7 @@
         decorLayer.appendChild(fruit);
         decorations.push(fruit);
         
-        playSound('fruit'); // 清脆啪声
-        
+        // 旋转随机角度
         const rot = (Math.random() - 0.5) * 45;
         setTimeout(() => {
           fruit.style.transform = `rotate(${rot}deg)`;
@@ -972,7 +791,7 @@
       };
     }
 
-    // 第四步：蜡烛（48px，0.75倍）
+    // 第四步：蜡烛（0.75倍 = 48px）
     function setupCandleInteraction() {
       candleCount = 0;
       
@@ -989,6 +808,7 @@
         const candle = document.createElement('div');
         candle.className = 'candle';
         candle.textContent = '🕯️';
+        // 48px大小，居中定位：left -24, top -48
         candle.style.left = (x - 24) + 'px';
         candle.style.top = (y - 48) + 'px';
         candle.style.transform = 'scale(0)';
@@ -997,8 +817,6 @@
         decorLayer.appendChild(candle);
         decorations.push(candle);
         candleCount++;
-        
-        playSound('candle'); // 木质咔声
         
         setTimeout(() => candle.style.transform = 'scale(1)', 10);
       };
@@ -1013,7 +831,6 @@
           if (candleCount === 0) showFeedback('先插蜡烛！');
           else {
             showFeedback('全部点燃！✨');
-            playSound('complete');
             setTimeout(nextStep, 1000);
           }
           return;
@@ -1023,6 +840,7 @@
         const clickX = e.clientX - rect.left;
         const clickY = e.clientY - rect.top;
         
+        // 查找最近的蜡烛（48px大小，检测范围60px）
         let nearest = null;
         let minDist = Infinity;
         
@@ -1038,13 +856,11 @@
         
         if (nearest) {
           nearest.classList.add('lit');
-          playSound('fire'); // 火焰呼呼声
           showFeedback('点燃！🔥');
           
           if (candles.length === 1) {
             setTimeout(() => {
               showFeedback('生日快乐！🎂');
-              playSound('complete');
               setTimeout(nextStep, 1500);
             }, 800);
           }
@@ -1054,7 +870,7 @@
 
     // 第六步：自由装饰
     function setupDecorateInteraction() {
-      // 拖拽装饰在createEmojiPalette中处理
+      // 保持之前的装饰，添加拖拽功能
     }
 
     function createEmojiPalette() {
@@ -1087,7 +903,6 @@
       `;
       dragEl.textContent = emoji;
       document.body.appendChild(dragEl);
-      playSound('pop'); // 拿起啵声
       
       const moveHandler = (e) => {
         const x = e.clientX || e.touches[0].clientX;
@@ -1110,7 +925,6 @@
           el.style.fontSize = '32px';
           decorLayer.appendChild(el);
           decorations.push(el);
-          playSound('pop'); // 放下啵声
         }
         
         dragEl.remove();
@@ -1129,23 +943,23 @@
     function nextStep() {
       if (currentStep < steps.length - 1) {
         currentStep++;
-        playSound('pop'); // 切换步骤音效
         updateStep();
       }
     }
 
     function resetStep() {
+      // 清空当前步骤的装饰（保留前几步的）
+      // 实际实现可以根据需求调整，这里简单重置
       decorLayer.innerHTML = '';
       decorations = [];
       candleCount = 0;
       fluffiness = 0;
       if (currentStep === 0) fluffFill.style.width = '0%';
-      playSound('pop');
       updateStep();
     }
 
     function finish() {
-      playSound('complete');
+      // 复制玩家蛋糕到结果页
       const playerCake = document.getElementById('playerCake');
       const clone = cakeArea.cloneNode(true);
       clone.style.width = '100%';
@@ -1153,39 +967,13 @@
       playerCake.innerHTML = '';
       playerCake.appendChild(clone);
       
+      // 显示结果页
       document.getElementById('makeStage').style.display = 'none';
       document.getElementById('resultPage').style.display = 'block';
       
+      // 庆祝动画
       createConfetti();
       setTimeout(createConfetti, 500);
-      
-      // 播放生日歌（简单模拟）
-      setTimeout(() => playBirthdaySong(), 500);
-    }
-
-    function playBirthdaySong() {
-      if (!soundEnabled) return;
-      const notes = [
-        {f: 523.25, d: 0.4}, {f: 523.25, d: 0.4}, // C5 C5
-        {f: 587.33, d: 0.8}, // D5
-        {f: 523.25, d: 0.8}, // C5
-        {f: 698.46, d: 0.8}, // F5
-        {f: 659.25, d: 1.2}, // E5
-      ];
-      let time = audioCtx.currentTime;
-      notes.forEach(note => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.value = note.f;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.1, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + note.d);
-        osc.start(time);
-        osc.stop(time + note.d);
-        time += note.d;
-      });
     }
 
     function createParticles(e, type) {
@@ -1255,6 +1043,7 @@
   </script>
 </body>
 </html>
+
 
 
 
