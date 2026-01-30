@@ -10,7 +10,6 @@
       padding: 0;
       background: linear-gradient(135deg, #ffe6f0, #f8d7ff);
       font-family: "Microsoft YaHei", sans-serif;
-      overflow-x: hidden;
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -46,8 +45,8 @@
       background: #fff9fc;
       border-radius: 50%;
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      overflow: visible; /* 允许装饰超出边界一点点 */
-      cursor: default;
+      overflow: visible;
+      cursor: pointer;
     }
     .cake-base {
       width: 100%;
@@ -58,7 +57,7 @@
     .decoration {
       position: absolute;
       font-size: 28px;
-      pointer-events: none; /* 防止遮挡点击 */
+      pointer-events: none;
       user-select: none;
       z-index: 10;
     }
@@ -97,13 +96,23 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     .btn:hover { background: #b71c1c; }
-    .result {
+    .result-page {
       display: none;
-      margin-top: 30px;
-      font-size: 36px;
+      width: 100%;
+      text-align: center;
+    }
+    .final-cake {
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .final-message {
+      font-size: 28px;
       color: #d32f2f;
       font-weight: bold;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      margin: 20px 0;
       font-family: 'STXingkai', 'KaiTi', serif;
       line-height: 1.4;
     }
@@ -120,35 +129,72 @@
       object-fit: cover;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
+    .feedback {
+      position: absolute;
+      font-size: 18px;
+      color: #d32f2f;
+      font-weight: bold;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .cream-splash {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .celebration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .confetti {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0;
+      animation: fall 5s linear forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
     @media (max-width: 400px) {
       .cake-area { width: 360px; height: 360px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="makeStage">
     <h1>🎂 奶糕的生日派对蛋糕制作</h1>
     <div class="step-instruction" id="instruction">第一步：添加蛋糕底胚</div>
 
-    <div class="cake-area" id="cakeArea">
-      <!-- 蛋糕图片将由 JS 动态加载 -->
-    </div>
+    <div class="cake-area" id="cakeArea"></div>
 
     <div class="emoji-palette" id="emojiPalette"></div>
 
     <button class="btn" onclick="nextStep()">下一步</button>
     <button class="btn" onclick="finish()">完成派对！</button>
+  </div>
 
-    <div class="result" id="result">
-      <div class="characters">
-        <img src="images/q_hanyu.jpg" alt="高瀚宇" class="character">
-        <img src="images/fox.jpg" alt="萌宠" class="character">
-      </div>
-      <p>高瀚宇，生日快乐！</p>
+  <div class="result-page" id="resultPage">
+    <h1>🎂 蛋糕完成啦！</h1>
+    <img src="images/6.jpg" alt="完成的蛋糕" class="final-cake">
+    <div class="final-message">高瀚宇，生日快乐！<br>愿你每天都开心～</div>
+    <div class="characters">
+      <img src="images/q_hanyu.jpg" alt="高瀚宇" class="character">
+      <img src="images/fox.jpg" alt="萌宠" class="character">
     </div>
   </div>
 
-  <!-- 音频（base64 编码，免外部依赖） -->
+  <div class="celebration" id="celebration"></div>
+
+  <!-- 音频 -->
   <audio id="clickSound" preload="auto">
     <source src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3b3JkIHdpdGggU291bmRibGFzdGVyISEhIQ==" type="audio/mpeg">
   </audio>
@@ -172,10 +218,12 @@
     const emojiPalette = document.getElementById('emojiPalette');
     const clickSound = document.getElementById('clickSound');
     const birthdaySong = document.getElementById('birthdaySong');
+    const makeStage = document.getElementById('makeStage');
+    const resultPage = document.getElementById('resultPage');
+    const celebration = document.getElementById('celebration');
 
     const emojis = ['🍦', '🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁'];
 
-    // 初始化
     function init() {
       updateStep();
       createEmojiPalette();
@@ -185,54 +233,161 @@
       if (currentStep < steps.length) {
         instruction.textContent = steps[currentStep].instruction;
         cakeArea.innerHTML = `<img src="${steps[currentStep].image}" class="cake-base">`;
+        bindStepInteraction();
       } else {
         instruction.textContent = '派对开始！自由装饰吧～';
         cakeArea.innerHTML = `<img src="images/6.jpg" class="cake-base">`;
+        bindStepInteraction(); // 绑定拖拽
       }
     }
 
-    function createEmojiPalette() {
-      emojiPalette.innerHTML = '';
-      emojis.forEach(emoji => {
-        const item = document.createElement('div');
-        item.className = 'emoji-item';
-        item.textContent = emoji;
-        item.dataset.emoji = emoji;
-        // 绑定拖拽开始事件（兼容 touch 和 mouse）
-        item.addEventListener('mousedown', startDrag);
-        item.addEventListener('touchstart', startDrag, { passive: false });
-        emojiPalette.appendChild(item);
-      });
+    function bindStepInteraction() {
+      cakeArea.onclick = null;
+      cakeArea.onmousedown = null;
+      cakeArea.ontouchstart = null;
+
+      switch (currentStep) {
+        case 0: // 蛋糕底胚
+          cakeArea.onclick = () => showFeedback("松软成功！");
+          break;
+        case 1: // 涂奶油
+          cakeArea.onmousedown = startCream;
+          cakeArea.ontouchstart = (e) => { e.preventDefault(); startCream(e); };
+          break;
+        case 2: // 加水果
+          cakeArea.onclick = () => showFeedback("水果加好啦！");
+          break;
+        case 3: // 插蜡烛
+          cakeArea.onclick = () => showFeedback("蜡烛插好啦！");
+          break;
+        case 4: // 点燃蜡烛
+          cakeArea.onclick = () => {
+            showFeedback("点燃成功！✨");
+            setTimeout(() => {
+              currentStep = 5;
+              updateStep();
+            }, 800);
+          };
+          break;
+        case 5: // 自由装饰
+          // 拖拽已在 palette 中绑定
+          break;
+      }
     }
 
-    // 拖拽逻辑
+    function showFeedback(text) {
+      playClick();
+      const feedback = document.createElement('div');
+      feedback.className = 'feedback';
+      feedback.textContent = text;
+      feedback.style.left = '50%';
+      feedback.style.top = '40%';
+      feedback.style.transform = 'translateX(-50%)';
+      cakeArea.appendChild(feedback);
+
+      // 动画
+      feedback.animate([
+        { opacity: 0, transform: 'translateX(-50%) translateY(20px)' },
+        { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+        { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+        { opacity: 0, transform: 'translateX(-50%) translateY(-20px)' }
+      ], {
+        duration: 1500,
+        easing: 'ease-out'
+      });
+
+      setTimeout(() => {
+        if (feedback.parentNode) feedback.parentNode.removeChild(feedback);
+      }, 1600);
+    }
+
+    // 奶油涂抹效果
+    let creamInterval = null;
+    function startCream(e) {
+      if (currentStep !== 1) return;
+      playClick();
+      const rect = cakeArea.getBoundingClientRect();
+      const x = (e.clientX || e.touches[0].clientX) - rect.left;
+      const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+      createCreamSplash(x, y);
+      creamInterval = setInterval(() => {
+        const nx = Math.random() * rect.width;
+        const ny = Math.random() * rect.height;
+        createCreamSplash(nx, ny);
+      }, 300);
+
+      const end = () => {
+        clearInterval(creamInterval);
+        document.removeEventListener('mouseup', end);
+        document.removeEventListener('touchend', end);
+      };
+      document.addEventListener('mouseup', end);
+      document.addEventListener('touchend', end, { passive: true });
+    }
+
+    function createCreamSplash(x, y) {
+      const splash = document.createElement('div');
+      splash.className = 'cream-splash';
+      splash.textContent = '🥛';
+      splash.style.left = (x - 12) + 'px';
+      splash.style.top = (y - 12) + 'px';
+      cakeArea.appendChild(splash);
+
+      splash.animate([
+        { opacity: 1, transform: 'scale(1)' },
+        { opacity: 0, transform: 'scale(1.5)' }
+      ], {
+        duration: 800,
+        easing: 'ease-out'
+      });
+
+      setTimeout(() => {
+        if (splash.parentNode) splash.parentNode.removeChild(splash);
+      }, 900);
+    }
+
+    // 拖拽装饰（仅第6步）
+    function createEmojiPalette() {
+      emojiPalette.innerHTML = '';
+      if (currentStep >= 5) {
+        emojis.forEach(emoji => {
+          const item = document.createElement('div');
+          item.className = 'emoji-item';
+          item.textContent = emoji;
+          item.dataset.emoji = emoji;
+          item.addEventListener('mousedown', startDrag);
+          item.addEventListener('touchstart', startDrag, { passive: false });
+          emojiPalette.appendChild(item);
+        });
+      } else {
+        emojiPalette.style.display = 'none';
+      }
+    }
+
+    // 拖拽逻辑（保持不变）
     let isDragging = false;
-    let currentEmoji = null;
     let dragElement = null;
 
     function startDrag(e) {
-      if (currentStep < 5) return; // 只在最后一步允许装饰
       e.preventDefault();
       isDragging = true;
-      currentEmoji = this.dataset.emoji;
+      const emoji = this.dataset.emoji;
 
-      // 创建临时拖拽元素
       dragElement = document.createElement('div');
       dragElement.style.position = 'fixed';
       dragElement.style.fontSize = '28px';
       dragElement.style.pointerEvents = 'none';
       dragElement.style.zIndex = '1000';
       dragElement.style.opacity = '0.8';
-      dragElement.textContent = currentEmoji;
+      dragElement.textContent = emoji;
       document.body.appendChild(dragElement);
 
-      // 获取初始位置
       const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
       dragElement.style.left = (clientX - 15) + 'px';
       dragElement.style.top = (clientY - 15) + 'px';
 
-      // 绑定移动和结束事件
       document.addEventListener('mousemove', dragMove);
       document.addEventListener('mouseup', dragEnd);
       document.addEventListener('touchmove', dragMove, { passive: false });
@@ -251,14 +406,11 @@
     function dragEnd(e) {
       if (!isDragging) return;
       isDragging = false;
-
-      // 移除临时元素
       if (dragElement) {
         document.body.removeChild(dragElement);
         dragElement = null;
       }
 
-      // 判断是否在蛋糕区域内
       const rect = cakeArea.getBoundingClientRect();
       const clientX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX;
       const clientY = e.type === 'touchend' ? e.changedTouches[0].clientY : e.clientY;
@@ -269,14 +421,12 @@
         clientY >= rect.top &&
         clientY <= rect.bottom
       ) {
-        // 计算相对于 cakeArea 的位置
         const x = clientX - rect.left;
         const y = clientY - rect.top;
-        addDecorationAt(currentEmoji, x, y);
+        addDecorationAt(this.dataset.emoji, x, y);
         playClick();
       }
 
-      // 清理事件
       document.removeEventListener('mousemove', dragMove);
       document.removeEventListener('mouseup', dragEnd);
       document.removeEventListener('touchmove', dragMove);
@@ -287,25 +437,45 @@
       const decoration = document.createElement('div');
       decoration.className = 'decoration';
       decoration.textContent = emoji;
-      decoration.style.left = (x - 15) + 'px'; // 居中对齐
+      decoration.style.left = (x - 15) + 'px';
       decoration.style.top = (y - 15) + 'px';
       cakeArea.appendChild(decoration);
     }
 
+    // 控制流程
     function nextStep() {
       playClick();
-      if (currentStep < steps.length) {
+      if (currentStep < 5) {
         currentStep++;
         updateStep();
+        createEmojiPalette();
       }
     }
 
     function finish() {
       playClick();
-      document.querySelectorAll('.btn').forEach(btn => btn.style.display = 'none');
-      document.getElementById('result').style.display = 'block';
       birthdaySong.play().catch(e => console.log("Audio play failed:", e));
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      makeStage.style.display = 'none';
+      resultPage.style.display = 'block';
+      startCelebration();
+    }
+
+    function startCelebration() {
+      const symbols = ['🎀', '🎉', '🎈', '🎁', '✨', '💖'];
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.animationDuration = (3 + Math.random() * 3) + 's';
+          confetti.style.fontSize = (20 + Math.random() * 20) + 'px';
+          celebration.appendChild(confetti);
+          setTimeout(() => {
+            if (confetti.parentNode) confetti.parentNode.removeChild(confetti);
+          }, 6000);
+        }, i * 200);
+      }
     }
 
     function playClick() {
@@ -317,4 +487,5 @@
   </script>
 </body>
 </html>
+
 
