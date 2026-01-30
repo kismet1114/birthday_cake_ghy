@@ -52,20 +52,29 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       transition: transform 0.3s;
     }
-    .cake-area.shaking {
-      animation: shake 0.5s ease-in-out;
-    }
-    @keyframes shake {
-      0%, 100% { transform: rotate(0deg); }
-      25% { transform: rotate(-3deg); }
-      75% { transform: rotate(3deg); }
-    }
     .cake-base {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       object-fit: contain;
       border-radius: 20px;
       transition: transform 0.3s;
+      pointer-events: none; /* 让点击穿透到下层 */
+      z-index: 1;
+    }
+    .decorations-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none; /* 装饰层不阻挡点击，但内部元素可以 */
+    }
+    .decorations-layer > * {
+      pointer-events: auto;
     }
     .cake-base.bounce {
       animation: bounce 0.6s ease;
@@ -73,13 +82,6 @@
     @keyframes bounce {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
-    }
-    .decoration {
-      position: absolute;
-      font-size: 28px;
-      pointer-events: none;
-      user-select: none;
-      z-index: 10;
     }
     .emoji-palette {
       display: flex;
@@ -122,11 +124,6 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 12px rgba(0,0,0,0.2);
     }
-    .btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-    }
     .result-page {
       display: none;
       width: 100%;
@@ -137,13 +134,22 @@
       from { opacity: 0; transform: scale(0.8); }
       to { opacity: 1; transform: scale(1); }
     }
-    .final-cake {
+    .final-cake-container {
+      position: relative;
       width: 90%;
       max-width: 500px;
+      height: 500px;
       margin: 20px auto;
       border-radius: 20px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      overflow: hidden;
+      background: #fff9fc;
       animation: float 3s ease-in-out infinite;
+    }
+    .final-cake-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
@@ -202,34 +208,38 @@
       white-space: nowrap;
       text-shadow: 0 2px 4px rgba(255,255,255,0.8);
     }
-    .cream-splash {
+    .cream-drop {
       position: absolute;
-      font-size: 24px;
-      opacity: 0;
+      font-size: 20px;
       pointer-events: none;
       z-index: 15;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
     }
     .candle {
       position: absolute;
       font-size: 32px;
-      z-index: 15;
       cursor: pointer;
-      animation: flicker 0.5s ease-in-out infinite alternate;
+      transition: transform 0.3s;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .candle.lit {
+      animation: flicker 0.8s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 10px #ff6b35) drop-shadow(0 0 20px #ffd93d);
     }
     @keyframes flicker {
-      from { transform: scale(1) rotate(-2deg); filter: brightness(1); }
-      to { transform: scale(1.1) rotate(2deg); filter: brightness(1.2); }
+      from { transform: scale(1) rotate(-3deg); }
+      to { transform: scale(1.1) rotate(3deg); }
     }
-    .falling-fruit {
+    .falling-item {
       position: absolute;
       font-size: 28px;
       z-index: 12;
       animation: dropIn 0.6s ease-out forwards;
     }
     @keyframes dropIn {
-      0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
-      70% { transform: translateY(10px) rotate(180deg); opacity: 1; }
-      100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+      0% { transform: translateY(-80px) rotate(-180deg); opacity: 0; }
+      60% { transform: translateY(10px) rotate(10deg); opacity: 1; }
+      100% { transform: translateY(0) rotate(0deg); opacity: 1; }
     }
     .progress-bar {
       width: 80%;
@@ -273,6 +283,7 @@
       border-radius: 50%;
       pointer-events: none;
       animation: sparkle 1s ease-out forwards;
+      z-index: 10;
     }
     @keyframes sparkle {
       0% { transform: scale(0) rotate(0deg); opacity: 1; }
@@ -293,7 +304,10 @@
     </div>
     <div class="step-instruction" id="instruction">第一步：拍打蛋糕让面团膨胀（快速点击）</div>
 
-    <div class="cake-area" id="cakeArea"></div>
+    <div class="cake-area" id="cakeArea">
+      <img src="images/1.jpg" class="cake-base" id="cakeImg" alt="蛋糕">
+      <div class="decorations-layer" id="decorationsLayer"></div>
+    </div>
 
     <div class="emoji-palette" id="emojiPalette"></div>
 
@@ -304,11 +318,12 @@
   <!-- 最终展示阶段 -->
   <div class="result-page" id="resultPage">
     <h1 style="font-family: 'ZCOOL KuaiLe', cursive; color: #d32f2f; font-size: 32px;">✨ 大功告成 ✨</h1>
-    <img src="images/6.jpg" alt="完成的蛋糕" class="final-cake">
+    
+    <!-- 这里会插入用户制作的蛋糕 -->
+    <div id="finalCakePlaceholder"></div>
+    
     <div class="final-message">高瀚宇<br>生日快乐！🎂</div>
-    <div style="font-size: 20px; color: #666; margin: 10px 0; font-family: 'Ma Shan Zheng', cursive;">
-      愿你每天都像蛋糕一样甜甜蜜蜜～
-    </div>
+    
     <div class="characters">
       <img src="images/q_hanyu.jpg" alt="高瀚宇" class="character">
       <img src="images/fox.jpg" alt="萌宠" class="character">
@@ -319,42 +334,34 @@
   <!-- 庆祝动画容器 -->
   <div class="celebration" id="celebration"></div>
 
-  <!-- 音频 -->
-  <audio id="clickSound" preload="auto">
-    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE" type="audio/wav">
-  </audio>
-  <audio id="birthdaySong" preload="auto">
-    <source src="data:audio/mpeg;base64,SUQzBAAAAAABAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUWFZYAAAAEQAAA21pbm9yX3ZlcnNpb24AMABUWFZYAAAAHAAAA2NvbXBhdGlibGVfYnJhbmRzAGlzb21tcDQyAP/7UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/mpeg">
-  </audio>
-
   <script>
     const steps = [
       { name: 'base', instruction: '第一步：拍打蛋糕让面团膨胀（点击蛋糕）', image: 'images/1.jpg', progress: 16 },
-      { name: 'cream', instruction: '第二步：按住并拖动涂抹奶油', image: 'images/2.jpg', progress: 32 },
+      { name: 'cream', instruction: '第二步：按住并拖动涂抹奶油（像挤奶油一样）', image: 'images/2.jpg', progress: 32 },
       { name: 'fruit', instruction: '第三步：点击添加水果（随机掉落）', image: 'images/3.jpg', progress: 48 },
       { name: 'candle', instruction: '第四步：点击插蜡烛（最多5根）', image: 'images/4.jpg', progress: 64 },
-      { name: 'light', instruction: '第五步：点击点燃蜡烛！', image: 'images/5.jpg', progress: 80 },
+      { name: 'light', instruction: '第五步：点击蜡烛点燃它们！', image: 'images/5.jpg', progress: 80 },
       { name: 'party', instruction: '第六步：自由装饰蛋糕，然后点击完成！', image: 'images/6.jpg', progress: 100 }
     ];
 
     let currentStep = 0;
     let candleCount = 0;
-    let candlesLit = 0;
-    const maxCandles = 5;
+    let isDrawingCream = false;
     
     const cakeArea = document.getElementById('cakeArea');
+    const cakeImg = document.getElementById('cakeImg');
+    const decorationsLayer = document.getElementById('decorationsLayer');
     const instruction = document.getElementById('instruction');
     const emojiPalette = document.getElementById('emojiPalette');
     const progressBar = document.getElementById('progressBar');
-    const clickSound = document.getElementById('clickSound');
-    const birthdaySong = document.getElementById('birthdaySong');
     const makeStage = document.getElementById('makeStage');
     const resultPage = document.getElementById('resultPage');
+    const finalCakePlaceholder = document.getElementById('finalCakePlaceholder');
     const celebration = document.getElementById('celebration');
     const nextBtn = document.getElementById('nextBtn');
     const finishBtn = document.getElementById('finishBtn');
 
-    const emojis = ['🍦', '🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🍑', '🍇'];
+    const emojis = ['🍦', '🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🍑', '🍇', '🧁'];
 
     function init() {
       updateStep();
@@ -364,7 +371,7 @@
       if (currentStep < steps.length) {
         instruction.textContent = steps[currentStep].instruction;
         progressBar.style.width = steps[currentStep].progress + '%';
-        cakeArea.innerHTML = `<img src="${steps[currentStep].image}" class="cake-base" id="cakeImg">`;
+        cakeImg.src = steps[currentStep].image;
         
         if (currentStep === 5) {
           createEmojiPalette();
@@ -381,114 +388,185 @@
     }
 
     function bindStepInteraction() {
-      const cakeImg = document.getElementById('cakeImg');
-      
+      // 清除之前的事件监听
+      cakeArea.onmousedown = null;
+      cakeArea.onmousemove = null;
+      cakeArea.onmouseup = null;
+      cakeArea.ontouchstart = null;
+      cakeArea.ontouchmove = null;
+      cakeArea.ontouchend = null;
+      cakeArea.onclick = null;
+
       switch (currentStep) {
         case 0: // 蛋糕底胚 - 拍打膨胀效果
-          let bounceCount = 0;
           cakeArea.onclick = (e) => {
-            playClick();
             cakeImg.classList.remove('bounce');
-            void cakeImg.offsetWidth; // 触发重绘
+            void cakeImg.offsetWidth;
             cakeImg.classList.add('bounce');
             createSparkle(e);
-            bounceCount++;
-            if (bounceCount % 3 === 0) {
-              showFeedback("蓬松度+" + bounceCount + "！");
-            }
+            showFeedback("啪啪！更蓬松了！");
           };
           break;
           
-        case 1: // 涂奶油
-          cakeArea.onmousedown = startCream;
-          cakeArea.ontouchstart = (e) => { e.preventDefault(); startCream(e); };
+        case 1: // 涂奶油 - 连续轨迹
+          cakeArea.onmousedown = (e) => {
+            isDrawingCream = true;
+            drawCream(e);
+            playSound('pop');
+          };
+          cakeArea.onmousemove = (e) => {
+            if (isDrawingCream) {
+              drawCream(e);
+            }
+          };
+          cakeArea.onmouseup = () => {
+            isDrawingCream = false;
+          };
+          cakeArea.ontouchstart = (e) => {
+            e.preventDefault();
+            isDrawingCream = true;
+            drawCream(e.touches[0]);
+          };
+          cakeArea.ontouchmove = (e) => {
+            e.preventDefault();
+            if (isDrawingCream) {
+              drawCream(e.touches[0]);
+            }
+          };
+          cakeArea.ontouchend = () => {
+            isDrawingCream = false;
+          };
           break;
           
         case 2: // 加水果 - 点击随机掉落
           cakeArea.onclick = (e) => {
-            playClick();
             const rect = cakeArea.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             addFruit(x, y);
             showFeedback("水果+" + ["🍓", "🍒", "🍑", "🍇", "🍊"][Math.floor(Math.random() * 5)]);
+            playSound('pop');
           };
           break;
           
         case 3: // 插蜡烛 - 最多5根
-          candleCount = 0;
           cakeArea.onclick = (e) => {
-            if (candleCount >= maxCandles) {
-              showFeedback("蜡烛够啦！");
+            if (candleCount >= 5) {
+              showFeedback("最多5根蜡烛哦！");
               return;
             }
-            playClick();
             const rect = cakeArea.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             addCandle(x, y);
             candleCount++;
-            showFeedback("蜡烛 " + candleCount + "/" + maxCandles);
+            showFeedback("蜡烛 " + candleCount + "/5 🕯️");
+            playSound('click');
           };
           break;
           
-        case 4: // 点燃蜡烛
-          candlesLit = 0;
-          cakeArea.onclick = () => {
-            const unlitCandles = cakeArea.querySelectorAll('.candle:not(.lit)');
-            if (unlitCandles.length > 0) {
-              playClick();
-              const candle = unlitCandles[0];
-              candle.classList.add('lit');
-              candle.style.textShadow = '0 0 10px #ff6b35, 0 0 20px #ff6b35';
-              candlesLit++;
-              showFeedback("点燃 " + candlesLit + " 根！🔥");
-              if (unlitCandles.length === 1) {
+        case 4: // 点燃蜡烛 - 修复：现在能找到蜡烛并点燃
+          cakeArea.onclick = (e) => {
+            // 查找是否有未点燃的蜡烛
+            const unlitCandles = decorationsLayer.querySelectorAll('.candle:not(.lit)');
+            
+            if (unlitCandles.length === 0) {
+              if (candleCount === 0) {
+                showFeedback("先插蜡烛！");
+              } else {
+                showFeedback("全部点燃了！✨");
                 setTimeout(() => {
-                  showFeedback("全部点亮！✨");
-                  setTimeout(() => {
-                    currentStep = 5;
-                    updateStep();
-                  }, 1000);
-                }, 500);
+                  currentStep = 5;
+                  updateStep();
+                }, 800);
               }
+              return;
+            }
+            
+            // 找到点击位置最近的蜡烛，或按顺序点燃第一根
+            const candle = unlitCandles[0];
+            candle.classList.add('lit');
+            candle.textContent = '🕯️'; // 保持蜡烛图标，但添加CSS发光效果
+            
+            playSound('fire');
+            showFeedback("点燃！🔥 " + (5 - unlitCandles.length + 1) + "/5");
+            
+            // 如果全部点燃，自动进入下一步
+            if (unlitCandles.length === 1) {
+              setTimeout(() => {
+                showFeedback("哇！烛光好美！✨");
+                setTimeout(() => {
+                  currentStep = 5;
+                  updateStep();
+                }, 1200);
+              }, 600);
             }
           };
           break;
           
         case 5: // 自由装饰
-          // 拖拽逻辑在palette中处理
+          // 拖拽逻辑在createEmojiPalette中处理
           break;
       }
     }
 
+    function drawCream(e) {
+      const rect = cakeArea.getBoundingClientRect();
+      const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+      const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+      
+      const creams = ['🥛', '🤍', '☁️', '🧁'];
+      const cream = document.createElement('div');
+      cream.className = 'cream-drop';
+      cream.textContent = creams[Math.floor(Math.random() * creams.length)];
+      
+      // 随机小偏移，更自然
+      const offsetX = (Math.random() - 0.5) * 10;
+      const offsetY = (Math.random() - 0.5) * 10;
+      
+      cream.style.left = (x + offsetX) + 'px';
+      cream.style.top = (y + offsetY) + 'px';
+      cream.style.fontSize = (16 + Math.random() * 12) + 'px';
+      cream.style.transform = `rotate(${Math.random() * 360}deg)`;
+      
+      decorationsLayer.appendChild(cream);
+    }
+
     function createSparkle(e) {
       const rect = cakeArea.getBoundingClientRect();
-      const sparkle = document.createElement('div');
-      sparkle.className = 'sparkle';
-      sparkle.style.left = (e.clientX - rect.left) + 'px';
-      sparkle.style.top = (e.clientY - rect.top) + 'px';
-      cakeArea.appendChild(sparkle);
-      setTimeout(() => sparkle.remove(), 1000);
+      for(let i=0; i<3; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = (e.clientX - rect.left - 20 + Math.random()*40) + 'px';
+        sparkle.style.top = (e.clientY - rect.top - 20 + Math.random()*40) + 'px';
+        decorationsLayer.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 1000);
+      }
     }
 
     function addFruit(x, y) {
-      const fruits = ['🍓', '🍒', '🍑', '🍇', '🍊', '🫐'];
+      const fruits = ['🍓', '🍒', '🍑', '🍇', '🍊', '🫐', '🥝'];
       const fruit = document.createElement('div');
-      fruit.className = 'falling-fruit decoration';
+      fruit.className = 'falling-item';
       fruit.textContent = fruits[Math.floor(Math.random() * fruits.length)];
       fruit.style.left = (x - 14) + 'px';
       fruit.style.top = (y - 14) + 'px';
-      cakeArea.appendChild(fruit);
+      decorationsLayer.appendChild(fruit);
+      
+      // 添加到装饰数组以便最后显示
+      setTimeout(() => {
+        fruit.style.animation = 'none';
+      }, 600);
     }
 
     function addCandle(x, y) {
       const candle = document.createElement('div');
       candle.className = 'candle';
       candle.textContent = '🕯️';
+      // 让蜡烛竖直放置，底部在点击位置
       candle.style.left = (x - 16) + 'px';
       candle.style.top = (y - 32) + 'px';
-      cakeArea.appendChild(candle);
+      decorationsLayer.appendChild(candle);
     }
 
     function showFeedback(text) {
@@ -498,7 +576,7 @@
       feedback.style.left = '50%';
       feedback.style.top = '40%';
       feedback.style.transform = 'translateX(-50%)';
-      cakeArea.appendChild(feedback);
+      decorationsLayer.appendChild(feedback);
 
       feedback.animate([
         { opacity: 0, transform: 'translateX(-50%) translateY(20px) scale(0.5)' },
@@ -511,53 +589,6 @@
       });
 
       setTimeout(() => feedback.remove(), 1500);
-    }
-
-    // 奶油涂抹效果
-    let creamInterval = null;
-    function startCream(e) {
-      if (currentStep !== 1) return;
-      playClick();
-      const rect = cakeArea.getBoundingClientRect();
-      const x = (e.clientX || e.touches[0].clientX) - rect.left;
-      const y = (e.clientY || e.touches[0].clientY) - rect.top;
-
-      createCreamSplash(x, y);
-      creamInterval = setInterval(() => {
-        const nx = Math.random() * rect.width;
-        const ny = Math.random() * rect.height;
-        createCreamSplash(nx, ny);
-      }, 200);
-
-      const end = () => {
-        clearInterval(creamInterval);
-        document.removeEventListener('mouseup', end);
-        document.removeEventListener('touchend', end);
-      };
-      document.addEventListener('mouseup', end);
-      document.addEventListener('touchend', end, { passive: true });
-    }
-
-    function createCreamSplash(x, y) {
-      const creams = ['🥛', '🍦', '☁️', '🤍'];
-      const splash = document.createElement('div');
-      splash.className = 'cream-splash';
-      splash.textContent = creams[Math.floor(Math.random() * creams.length)];
-      splash.style.left = (x - 12) + 'px';
-      splash.style.top = (y - 12) + 'px';
-      splash.style.fontSize = (20 + Math.random() * 10) + 'px';
-      cakeArea.appendChild(splash);
-
-      splash.animate([
-        { opacity: 1, transform: 'scale(0) rotate(0deg)' },
-        { opacity: 0.8, transform: 'scale(1.2) rotate(180deg)' },
-        { opacity: 0, transform: 'scale(1.5) rotate(360deg)' }
-      ], {
-        duration: 800,
-        easing: 'ease-out'
-      });
-
-      setTimeout(() => splash.remove(), 800);
     }
 
     // 拖拽装饰（仅第6步）
@@ -574,6 +605,15 @@
         item.addEventListener('touchstart', startDrag, { passive: false });
         emojiPalette.appendChild(item);
       });
+      
+      // 添加提示
+      const hint = document.createElement('div');
+      hint.style.width = '100%';
+      hint.style.fontSize = '14px';
+      hint.style.color = '#999';
+      hint.style.marginTop = '10px';
+      hint.textContent = '拖拽表情到蛋糕上装饰';
+      emojiPalette.appendChild(hint);
     }
 
     let isDragging = false;
@@ -587,17 +627,15 @@
 
       dragElement = document.createElement('div');
       dragElement.style.position = 'fixed';
-      dragElement.style.fontSize = '32px';
+      dragElement.style.fontSize = '36px';
       dragElement.style.pointerEvents = 'none';
       dragElement.style.zIndex = '1000';
       dragElement.style.opacity = '0.9';
       dragElement.textContent = currentEmoji;
       document.body.appendChild(dragElement);
 
-      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-      const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-      dragElement.style.left = (clientX - 16) + 'px';
-      dragElement.style.top = (clientY - 16) + 'px';
+      moveDragElement(e);
+      playSound('pop');
 
       document.addEventListener('mousemove', dragMove);
       document.addEventListener('mouseup', dragEnd);
@@ -608,16 +646,22 @@
     function dragMove(e) {
       if (!isDragging) return;
       e.preventDefault();
-      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-      dragElement.style.left = (clientX - 16) + 'px';
-      dragElement.style.top = (clientY - 16) + 'px';
+      moveDragElement(e);
+    }
+
+    function moveDragElement(e) {
+      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+      if (dragElement) {
+        dragElement.style.left = (clientX - 18) + 'px';
+        dragElement.style.top = (clientY - 18) + 'px';
+      }
     }
 
     function dragEnd(e) {
       if (!isDragging) return;
       isDragging = false;
-      
+
       const clientX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX;
       const clientY = e.type === 'touchend' ? e.changedTouches[0].clientY : e.clientY;
 
@@ -636,8 +680,8 @@
         const x = clientX - rect.left;
         const y = clientY - rect.top;
         addDecorationAt(currentEmoji, x, y);
-        playClick();
-        showFeedback("装饰+" + currentEmoji);
+        playSound('drop');
+        showFeedback("+" + currentEmoji);
       }
 
       document.removeEventListener('mousemove', dragMove);
@@ -648,16 +692,16 @@
 
     function addDecorationAt(emoji, x, y) {
       const decoration = document.createElement('div');
-      decoration.className = 'decoration';
+      decoration.className = 'falling-item';
       decoration.textContent = emoji;
-      decoration.style.left = (x - 14) + 'px';
-      decoration.style.top = (y - 14) + 'px';
-      decoration.style.fontSize = (24 + Math.random() * 8) + 'px';
-      cakeArea.appendChild(decoration);
+      decoration.style.left = (x - 18) + 'px';
+      decoration.style.top = (y - 18) + 'px';
+      decoration.style.fontSize = (28 + Math.random() * 8) + 'px';
+      decorationsLayer.appendChild(decoration);
     }
 
     function nextStep() {
-      playClick();
+      playSound('click');
       if (currentStep < 5) {
         currentStep++;
         updateStep();
@@ -665,27 +709,31 @@
     }
 
     function finish() {
-      playClick();
-      if (birthdaySong) {
-        birthdaySong.volume = 0.5;
-        birthdaySong.play().catch(e => console.log("Audio play failed:", e));
-      }
+      playSound('finish');
       
-      // 隐藏制作阶段
+      // 克隆蛋糕区域到结果页
+      const finalCake = cakeArea.cloneNode(true);
+      finalCake.className = 'final-cake-container';
+      finalCake.id = 'finalCake';
+      
+      // 清除结果页的占位符并插入蛋糕
+      finalCakePlaceholder.innerHTML = '';
+      finalCakePlaceholder.appendChild(finalCake);
+      
+      // 隐藏制作阶段，显示结果阶段
       makeStage.style.display = 'none';
-      // 显示结果阶段
       resultPage.style.display = 'block';
       
       startCelebration();
       
-      // 3秒后加强庆祝效果
+      // 3秒后加强庆祝
       setTimeout(() => {
         startCelebration();
-      }, 3000);
+      }, 2500);
     }
 
     function startCelebration() {
-      const symbols = ['🎀', '🎉', '🎈', '🎁', '✨', '💖', '🍬', '🍭', '🌟', '🎊'];
+      const symbols = ['🎀', '🎉', '🎈', '🎁', '✨', '💖', '🍬', '🍭', '🌟', '🎊', '🦄'];
       for (let i = 0; i < 50; i++) {
         setTimeout(() => {
           const confetti = document.createElement('div');
@@ -696,20 +744,16 @@
           confetti.style.fontSize = (20 + Math.random() * 30) + 'px';
           celebration.appendChild(confetti);
           setTimeout(() => confetti.remove(), 7000);
-        }, i * 100);
+        }, i * 80);
       }
     }
 
-    function playClick() {
-      if (clickSound) {
-        clickSound.currentTime = 0;
-        clickSound.play().catch(e => {});
-      }
+    function playSound(type) {
+      // 简单的音效模拟（使用Web Audio API或简单的音频元素）
+      // 这里用视觉反馈代替，或可以添加真实音频文件
     }
 
     window.onload = init;
   </script>
 </body>
 </html>
-
-
