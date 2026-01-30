@@ -14,66 +14,64 @@
       padding: 0; 
       user-select: none !important;
       -webkit-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
+      touch-action: manipulation;
     }
     
     body {
       margin: 0;
-      padding: 0;
+      padding: 20px;
       background: linear-gradient(135deg, #ffe6f0 0%, #f8d7ff 100%);
       font-family: "Microsoft YaHei", sans-serif;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
-      -webkit-touch-callout: none;
     }
 
     .main-container {
       width: 100%;
       max-width: 1000px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 24px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.1);
       padding: 30px;
+      position: relative;
     }
 
     h1 {
       color: #d32f2f;
-      font-size: 28px;
+      font-size: 32px;
       text-align: center;
       margin-bottom: 25px;
       font-family: 'ZCOOL KuaiLe', cursive;
-      letter-spacing: 2px;
     }
 
-    /* 步骤指示器 */
     .step-indicator {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-bottom: 30px;
+      position: relative;
     }
+    
     .step-dot {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: #e0e0e0;
-      transition: all 0.3s;
+      transition: all 0.4s;
     }
-    .step-dot.active {
-      background: #e91e63;
-      width: 30px;
-      border-radius: 5px;
+    
+    .step-dot.active { 
+      background: #e91e63; 
+      width: 35px; 
+      border-radius: 15px;
     }
-    .step-dot.completed {
-      background: #c44569;
+    
+    .step-dot.completed { 
+      background: #c44569; 
     }
 
-    /* 双栏布局 */
     .workspace {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -82,14 +80,10 @@
     }
 
     @media (max-width: 768px) {
-      .workspace {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
+      .workspace { grid-template-columns: 1fr; }
     }
 
-    /* 左边指引区 */
-    .guide-panel {
+    .guide-panel, .work-panel {
       background: linear-gradient(135deg, #fff9fc, #fff0f5);
       border-radius: 20px;
       padding: 20px;
@@ -98,7 +92,7 @@
       position: relative;
     }
 
-    .guide-label {
+    .guide-label, .work-label {
       display: inline-block;
       background: #e91e63;
       color: white;
@@ -109,83 +103,74 @@
       font-weight: bold;
     }
 
-    .guide-image {
-      width: 100%;
-      max-width: 300px;
-      height: 300px;
-      object-fit: contain;
-      border-radius: 16px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-      transition: all 0.5s;
-      pointer-events: none;
-    }
-
-    .guide-text {
-      margin-top: 15px;
-      color: #666;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    /* 右边工作区 */
-    .work-panel {
-      background: linear-gradient(135deg, #ffffff, #fff9fc);
-      border-radius: 20px;
-      padding: 20px;
-      text-align: center;
-      border: 2px dashed rgba(255, 107, 157, 0.4);
-      position: relative;
-      min-height: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
     .work-label {
-      display: inline-block;
       background: #ff6b9d;
-      color: white;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      margin-bottom: 15px;
-      font-weight: bold;
       position: absolute;
       top: -12px;
       left: 50%;
       transform: translateX(-50%);
     }
 
+    .guide-image {
+      width: 100%;
+      max-width: 280px;
+      height: 280px;
+      object-fit: contain;
+      border-radius: 16px;
+      border: 2px solid rgba(0,0,0,0.05);
+    }
+
+    .guide-text {
+      margin-top: 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
     .instruction-text {
       color: #e91e63;
       font-size: 18px;
       font-weight: bold;
-      margin-bottom: 15px;
+      margin: 15px 0;
       min-height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
+      background: rgba(255,255,255,0.8);
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px dashed rgba(233,30,99,0.3);
     }
 
-    .instruction-hint {
-      font-size: 13px;
-      color: #999;
-      font-weight: normal;
-      margin-top: 5px;
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 3px;
+      margin: 10px 0;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .progress-bar.active { display: block; }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b9d, #e91e63);
+      width: 0%;
+      transition: width 0.3s;
     }
 
-    /* 蛋糕工作区 */
     .cake-workspace {
       position: relative;
       width: 100%;
       max-width: 350px;
       height: 350px;
       margin: 0 auto;
-      background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,249,252,0.5));
+      background: rgba(255,255,255,0.8);
       border-radius: 16px;
-      overflow: hidden; /* 防止装饰溢出 */
+      overflow: visible;
+      touch-action: none;
+      border: 2px dashed rgba(255, 107, 157, 0.2);
     }
 
     .cake-base-img {
@@ -196,15 +181,10 @@
       height: 100%;
       object-fit: contain;
       border-radius: 16px;
-      transition: transform 0.3s;
       z-index: 1;
-      pointer-events: none; /* 防止图片被拖拽 */
-      -webkit-user-drag: none; /* 禁止拖拽图片 */
-    }
-
-    /* 蓬松动画 */
-    .cake-base-img.squashed {
-      transform: scaleY(0.9) scaleX(1.05);
+      pointer-events: none;
+      transition: transform 0.2s;
+      display: block; /* 确保图片显示 */
     }
 
     .decorations-layer {
@@ -213,116 +193,76 @@
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none; /* 装饰层不阻挡点击 */
+      pointer-events: none;
       z-index: 10;
     }
 
-    /* 奶油 - 纯白色小圆点 */
-    .cream-drop {
+    .cream-flower {
       position: absolute;
-      width: 10px;
-      height: 10px;
-      background: radial-gradient(circle at 30% 30%, #ffffff, #f5f5f5);
-      border-radius: 50%;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      width: 24px;
+      height: 24px;
       pointer-events: none;
-      animation: creamPop 0.3s ease-out;
-      /* 确保透明背景 */
-      background-color: transparent;
-    }
-
-    @keyframes creamPop {
-      0% { transform: scale(0); opacity: 0; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    /* 水果 - 只保留4种 */
-    .falling-fruit {
-      position: absolute;
-      font-size: 24px;
-      animation: fruitDrop 0.6s ease-out forwards;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
       z-index: 15;
-      /* 关键：确保emoji没有背景色 */
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      outline: none !important;
-      box-shadow: none !important;
+      animation: creamGrow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes creamGrow {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      100% { transform: scale(1) rotate(360deg); opacity: 1; }
+    }
+
+    .static-fruit {
+      position: absolute;
+      font-size: 26px;
+      z-index: 16;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+      animation: fruitDrop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       pointer-events: none;
-      line-height: 1;
     }
 
     @keyframes fruitDrop {
-      0% { transform: translateY(-50px) rotate(-180deg) scale(0.5); opacity: 0; }
-      60% { transform: translateY(10px) rotate(10deg) scale(1.1); opacity: 1; }
-      100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      0% { transform: scale(0) translateY(-20px); }
+      70% { transform: scale(1.2) translateY(5px); }
+      100% { transform: scale(1) translateY(0); }
     }
 
-    /* 第六步拖拽的装饰emoji */
-    .decoration-emoji {
-      position: absolute;
-      font-size: 28px;
-      z-index: 20;
-      animation: emojiPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      cursor: grab;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-      /* 关键：确保没有背景色 */
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      outline: none !important;
-      box-shadow: none !important;
-      pointer-events: none; /* 装饰不阻挡 */
-      line-height: 1;
-    }
-
-    @keyframes emojiPop {
-      0% { transform: scale(0) rotate(-90deg); opacity: 0; }
-      70% { transform: scale(1.2) rotate(10deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-
-    /* 蜡烛 - 0.75倍大小 (48px) */
     .candle {
       position: absolute;
       font-size: 48px;
       cursor: pointer;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
       z-index: 20;
       transition: transform 0.2s;
-      animation: candlePlace 0.3s ease-out;
-      /* 关键：确保emoji蜡烛没有背景 */
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      outline: none !important;
-      box-shadow: none !important;
-      pointer-events: auto; /* 蜡烛可以点击点燃 */
-      line-height: 1;
+      animation: candleInsert 0.3s ease-out;
     }
 
-    @keyframes candlePlace {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+    @keyframes candleInsert {
+      from { transform: translateY(-30px) scale(0.8); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
 
-    .candle:hover {
-      transform: scale(1.1);
-    }
-
+    .candle:hover { transform: scale(1.1) translateY(-5px); }
     .candle.lit {
       animation: flicker 0.8s ease-in-out infinite alternate;
       filter: drop-shadow(0 0 10px #ff6b35) drop-shadow(0 0 20px #ffd93d);
     }
-
     @keyframes flicker {
       from { transform: scale(1) rotate(-2deg); }
       to { transform: scale(1.05) rotate(2deg); }
     }
 
-    /* Emoji 面板 */
+    .decoration-emoji {
+      position: absolute;
+      font-size: 28px;
+      z-index: 20;
+      animation: decorPlace 0.3s ease-out;
+      pointer-events: none;
+    }
+
+    @keyframes decorPlace {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
     .emoji-palette {
       display: flex;
       justify-content: center;
@@ -330,9 +270,10 @@
       gap: 10px;
       margin-top: 15px;
       padding: 15px;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.9);
       border-radius: 16px;
-      width: 100%;
+      max-height: 120px;
+      overflow-y: auto;
     }
 
     .emoji-item {
@@ -340,36 +281,22 @@
       height: 45px;
       font-size: 24px;
       cursor: grab;
-      background: white; /* 面板里的emoji有背景是正常的，为了可点击区域 */
+      background: white;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       transition: all 0.2s;
-      /* 防止被选中 */
-      user-select: none;
-      -webkit-user-select: none;
-      border: 2px solid transparent;
     }
+    .emoji-item:hover { transform: translateY(-3px) scale(1.1); }
 
-    .emoji-item:hover {
-      transform: translateY(-3px) scale(1.1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      border-color: rgba(255, 107, 157, 0.3);
-    }
-
-    .emoji-item:active {
-      cursor: grabbing;
-      transform: scale(0.95);
-    }
-
-    /* 按钮组 */
     .button-group {
       display: flex;
       justify-content: center;
       gap: 15px;
       margin-top: 20px;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -383,76 +310,22 @@
       box-shadow: 0 4px 12px rgba(211,47,47,0.3);
       transition: all 0.3s;
       font-family: 'ZCOOL KuaiLe', cursive;
-      /* 防止按钮被选中 */
-      user-select: none;
-      -webkit-user-select: none;
     }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(211,47,47,0.4);
-    }
-
-    .btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-    }
-
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(211,47,47,0.4); }
     .btn-secondary {
       background: linear-gradient(135deg, #ff9a9e, #fecfef);
       color: #d32f2f;
     }
 
-    /* 蓬松度指示 */
-    .fluff-meter {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255,255,255,0.95);
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      color: #e91e63;
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      z-index: 30;
-      pointer-events: none;
-    }
-
-    .fluff-bar {
-      width: 80px;
-      height: 6px;
-      background: #f0f0f0;
-      border-radius: 3px;
-      margin-top: 5px;
-      overflow: hidden;
-    }
-
-    .fluff-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #ff9a9e, #fecfef);
-      width: 0%;
-      transition: width 0.3s;
-    }
-
-    /* 结果页 - 左右对比 */
-    .result-page {
-      display: none;
-      animation: fadeIn 1s ease;
-    }
-
+    .result-page { display: none; animation: fadeIn 1s; }
     .result-compare {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 30px;
       margin: 30px 0;
     }
-
     @media (max-width: 768px) {
-      .result-compare {
-        grid-template-columns: 1fr;
-      }
+      .result-compare { grid-template-columns: 1fr; }
     }
 
     .result-box {
@@ -463,48 +336,22 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
 
-    .result-label {
-      font-family: 'ZCOOL KuaiLe', cursive;
-      color: #e91e63;
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-
-    .final-cake-display {
-      width: 100%;
-      max-width: 300px;
-      height: 300px;
-      margin: 0 auto;
-      position: relative;
-      background: linear-gradient(135deg, #fff9fc, #fff0f5);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .final-cake-display img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
     .final-message {
       font-size: 42px;
       text-align: center;
       margin: 30px 0;
       font-family: 'ZCOOL KuaiLe', cursive;
-      background: linear-gradient(45deg, #ff6b6b, #f9ca24, #ff9ff3, #54a0ff);
-      background-size: 300% 300%;
+      background: linear-gradient(45deg, #ff6b6b, #f9ca24, #ff9ff3);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-size: 200% 200%;
       animation: rainbow 3s ease infinite;
     }
-
     @keyframes rainbow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -518,73 +365,47 @@
       height: 100%;
       pointer-events: none;
       z-index: 1000;
-      overflow: hidden;
     }
-
     .confetti {
       position: absolute;
       font-size: 24px;
       animation: fall 4s linear forwards;
     }
-
     @keyframes fall {
       0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
 
-    /* 粒子效果 */
-    .particle {
-      position: absolute;
-      pointer-events: none;
-      z-index: 50;
-      animation: particleFly 0.8s ease-out forwards;
-    }
-
-    @keyframes particleFly {
-      0% { transform: translate(0,0) scale(1); opacity: 1; }
-      100% { transform: translate(var(--tx), var(--ty)) scale(0.5); opacity: 0; }
-    }
-
-    /* 音效开关提示 */
-    .sound-hint {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(255,255,255,0.9);
-      padding: 10px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      color: #666;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    /* 拖拽时的幽灵元素 */
     .dragging-ghost {
       position: fixed;
       font-size: 36px;
       pointer-events: none;
       z-index: 1000;
-      /* 确保拖拽时没有背景 */
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      outline: none !important;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      line-height: 1;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
   </style>
 </head>
 <body>
-  <div class="sound-hint" id="soundHint" onclick="initAudio()">
-    <span>🔊</span> 点击任意处开启音效
-  </div>
-
   <div class="main-container" id="makeStage">
     <h1>🎂 奶糕的生日派对蛋糕制作</h1>
     
@@ -598,33 +419,19 @@
     </div>
 
     <div class="workspace">
-      <!-- 左边指引区 -->
       <div class="guide-panel">
         <div class="guide-label">📖 制作指引</div>
-        <img src="images/1.jpg" class="guide-image" id="guideImage" alt="指引图">
-        <div class="guide-text" id="guideText">
-          首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松
-        </div>
+        <img src="1.jpg" class="guide-image" id="guideImage" alt="指引图">
+        <div class="guide-text" id="guideText">首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松</div>
       </div>
 
-      <!-- 右边工作区 -->
-      <div class="work-panel">
+      <div class="work-panel" style="position: relative;">
         <div class="work-label">👩‍🍳 你的工作台</div>
-        
-        <div class="instruction-text" id="instruction">
-          第一步：按住蛋糕拍打，让面团膨胀！
-          <div class="instruction-hint">按住鼠标/手指压扁，松开回弹</div>
-        </div>
+        <div class="instruction-text" id="instruction">第一步：按住蛋糕拍打，让面团膨胀！</div>
+        <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
 
         <div class="cake-workspace" id="cakeArea">
-          <div class="fluff-meter" id="fluffMeter" style="display: none;">
-            蓬松度
-            <div class="fluff-bar">
-              <div class="fluff-fill" id="fluffFill"></div>
-            </div>
-          </div>
-          <!-- 第六步时这里应该显示蛋糕底图，上面叠加装饰 -->
-          <img src="images/1.jpg" class="cake-base-img" id="workImage" alt="工作蛋糕" draggable="false">
+          <img src="1.jpg" class="cake-base-img" id="workImage" alt="工作蛋糕">
           <div class="decorations-layer" id="decorationsLayer"></div>
         </div>
 
@@ -633,397 +440,404 @@
     </div>
 
     <div class="button-group">
+      <button class="btn btn-secondary" onclick="prevStep()" id="prevBtn" style="display: none;">上一步</button>
       <button class="btn" onclick="nextStep()" id="nextBtn">下一步 👉</button>
-      <button class="btn btn-secondary" onclick="resetStep()" id="resetBtn" style="display: none;">重置本步 ↩️</button>
+      <button class="btn btn-secondary" onclick="resetStep()" id="resetBtn" style="display: none;">重置 ↩️</button>
+      <button class="btn btn-secondary" onclick="undoLast()" id="undoBtn" style="display: none;">撤销 ↶</button>
       <button class="btn" onclick="finish()" id="finishBtn" style="display: none;">完成派对！🎉</button>
     </div>
   </div>
 
-  <!-- 结果页 -->
   <div class="result-page" id="resultPage" style="display: none;">
-    <h1 style="font-family: 'ZCOOL KuaiLe', cursive; color: #d32f2f; font-size: 32px; text-align: center;">✨ 大功告成 ✨</h1>
-    
+    <h1 style="text-align: center; color: #d32f2f; font-family: 'ZCOOL KuaiLe', cursive;">✨ 大功告成 ✨</h1>
     <div class="result-compare">
       <div class="result-box">
-        <div class="result-label">🎨 你制作的蛋糕</div>
-        <div class="final-cake-display" id="playerCake"></div>
+        <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 10px;">🎨 你制作的蛋糕</div>
+        <div class="final-cake-wrapper" id="playerCake" style="position: relative; width: 100%; height: 350px; background: #fff9fc; border-radius: 16px;"></div>
       </div>
       <div class="result-box">
-        <div class="result-label">✨ 完美成品参考</div>
-        <div class="final-cake-display">
-          <img src="images/6.jpg" alt="成品蛋糕">
+        <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 10px;">✨ 完美成品参考</div>
+        <div style="position: relative; width: 100%; height: 350px; background: #fff9fc; border-radius: 16px;">
+          <img src="6.jpg" alt="成品" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;">
         </div>
       </div>
     </div>
-
     <div class="final-message">高瀚宇<br>生日快乐！🎂</div>
-
     <div class="button-group">
       <button class="btn" onclick="location.reload()">再做一个 🔄</button>
     </div>
   </div>
 
   <div class="celebration" id="celebration"></div>
+  <div class="toast" id="toast"></div>
 
   <script>
-    // 音频上下文（保持不变）
-    let audioCtx = null;
-    let soundEnabled = false;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        soundEnabled = true;
-        const hint = document.getElementById('soundHint');
-        if (hint) hint.style.display = 'none';
-      }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    function playSound(type) {
-      if (!soundEnabled || !audioCtx) return;
-      
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-      
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      const now = audioCtx.currentTime;
-      
-      switch(type) {
-        case 'pop':
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(600, now);
-          osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-          osc.start(now);
-          osc.stop(now + 0.1);
-          break;
-        case 'complete':
-          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-            const oscC = audioCtx.createOscillator();
-            const gainC = audioCtx.createGain();
-            oscC.connect(gainC);
-            gainC.connect(audioCtx.destination);
-            oscC.type = 'sine';
-            oscC.frequency.value = freq;
-            gainC.gain.setValueAtTime(0, now + i * 0.1);
-            gainC.gain.linearRampToValueAtTime(0.1, now + i * 0.1 + 0.05);
-            gainC.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.5);
-            oscC.start(now + i * 0.1);
-            oscC.stop(now + i * 0.1 + 0.5);
-          });
-          break;
-      }
-    }
-
-    // 步骤配置
+    // 注意：图片路径已改为直接 1.jpg, 2.jpg 等（假设与HTML同目录）
+    // 如果您的图片在images文件夹里，请把路径改回 images/1.jpg 等
     const steps = [
-      { guide: 'images/1.jpg', work: 'images/1.jpg', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', hint: '按住鼠标/手指压扁，松开回弹', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff' },
-      { guide: 'images/2.jpg', work: 'images/2.jpg', instruction: '第二步：涂抹奶油', hint: '按住并拖动鼠标，像挤奶油一样', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
-      { guide: 'images/3.jpg', work: 'images/2.jpg', instruction: '第三步：添加水果装饰', hint: '点击任意位置添加水果（草莓、樱桃、蓝莓、葡萄）', guideText: '挑选新鲜水果点缀蛋糕，让色彩更丰富', action: 'fruit' },
-      { guide: 'images/4.jpg', work: 'images/2.jpg', instruction: '第四步：插上生日蜡烛', hint: '点击添加蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝，最多可以放5根哦', action: 'candle' },
-      { guide: 'images/5.jpg', work: 'images/2.jpg', instruction: '第五步：点燃蜡烛！', hint: '点击蜡烛点燃它们', guideText: '点亮蜡烛，准备唱生日歌', action: 'light' },
-      { guide: 'images/6.jpg', work: 'images/2.jpg', instruction: '第六步：自由装饰 & 完成！', hint: '拖拽下方表情装饰蛋糕，然后点击完成', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
+      { guide: '1.jpg', work: '1.jpg', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
+      { guide: '2.jpg', work: '2.jpg', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
+      { guide: '3.jpg', work: '2.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true },
+      { guide: '4.jpg', work: '2.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
+      { guide: '5.jpg', work: '2.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
+      { guide: '6.jpg', work: '2.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
     ];
 
     let currentStep = 0;
+    let fluffiness = 0;
     let candleCount = 0;
     let isDrawing = false;
     let decorations = [];
-    
-    const guideImage = document.getElementById('guideImage');
-    const workImage = document.getElementById('workImage');
-    const guideText = document.getElementById('guideText');
-    const instruction = document.getElementById('instruction');
-    const cakeArea = document.getElementById('cakeArea');
-    const decorLayer = document.getElementById('decorationsLayer');
-    const fluffMeter = document.getElementById('fluffMeter');
-    const fluffFill = document.getElementById('fluffFill');
-    const emojiPalette = document.getElementById('emojiPalette');
-    const nextBtn = document.getElementById('nextBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const finishBtn = document.getElementById('finishBtn');
 
-    const emojis = ['🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐'];
+    const emojis = ['🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🐱', '🎀'];
+    const fruits = ['🍓', '🍒', '🫐', '🍇', '🍑', '🍊'];
 
-    document.addEventListener('click', initAudio, { once: true });
-    document.addEventListener('touchstart', initAudio, { once: true });
-
-    function init() {
-      updateStep();
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
     function updateStep() {
       const step = steps[currentStep];
       
+      // 更新指示器
       document.querySelectorAll('.step-dot').forEach((dot, idx) => {
-        dot.classList.remove('active', 'completed');
-        if (idx < currentStep) dot.classList.add('completed');
-        if (idx === currentStep) dot.classList.add('active');
+        dot.className = 'step-dot' + (idx < currentStep ? ' completed' : '') + (idx === currentStep ? ' active' : '');
       });
 
-      guideImage.src = step.guide;
-      guideText.textContent = step.guideText;
+      // 更新内容
+      document.getElementById('guideImage').src = step.guide;
+      document.getElementById('workImage').src = step.work;
+      document.getElementById('guideText').textContent = step.guideText;
+      document.getElementById('instruction').textContent = step.instruction;
       
-      workImage.src = step.work;
-      workImage.style.display = 'block';
+      // 进度条
+      document.getElementById('progressBar').style.display = step.hasProgress ? 'block' : 'none';
+      updateProgressDisplay();
       
-      instruction.innerHTML = `${step.instruction}<div class="instruction-hint">${step.hint}</div>`;
+      // 交互设置
+      setupInteraction();
       
-      resetInteractions();
+      // 按钮
+      document.getElementById('prevBtn').style.display = currentStep > 0 ? 'inline-block' : 'none';
+      document.getElementById('resetBtn').style.display = currentStep > 0 ? 'inline-block' : 'none';
+      document.getElementById('undoBtn').style.display = (currentStep >= 2 && currentStep <= 5) ? 'inline-block' : 'none';
+      document.getElementById('nextBtn').style.display = currentStep === 5 ? 'none' : 'inline-block';
+      document.getElementById('finishBtn').style.display = currentStep === 5 ? 'inline-block' : 'none';
+      document.getElementById('emojiPalette').style.display = currentStep === 5 ? 'flex' : 'none';
       
-      if (currentStep === 0) {
-        fluffMeter.style.display = 'block';
-        setupFluffInteraction();
-      } else {
-        fluffMeter.style.display = 'none';
-      }
-      
-      if (currentStep === 1) setupCreamInteraction();
-      if (currentStep === 2) setupFruitInteraction();
-      if (currentStep === 3) setupCandleInteraction();
-      if (currentStep === 4) setupLightInteraction();
-      if (currentStep === 5) setupDecorateInteraction();
-      
-      if (currentStep === 5) {
-        nextBtn.style.display = 'none';
-        finishBtn.style.display = 'inline-block';
-        resetBtn.style.display = 'inline-block';
-        emojiPalette.style.display = 'flex';
-        createEmojiPalette();
-      } else {
-        nextBtn.style.display = 'inline-block';
-        finishBtn.style.display = 'none';
-        resetBtn.style.display = 'none';
-        emojiPalette.style.display = 'none';
-      }
+      if (currentStep === 5) createEmojiPalette();
     }
 
-    function resetInteractions() {
+    function setupInteraction() {
+      const cakeArea = document.getElementById('cakeArea');
+      const workImage = document.getElementById('workImage');
+      const decorLayer = document.getElementById('decorationsLayer');
+      const step = steps[currentStep];
+      
+      // 清除旧事件
       cakeArea.onmousedown = null;
       cakeArea.onmousemove = null;
       cakeArea.onmouseup = null;
       cakeArea.onmouseleave = null;
+      cakeArea.onclick = null;
       cakeArea.ontouchstart = null;
       cakeArea.ontouchmove = null;
       cakeArea.ontouchend = null;
-      cakeArea.onclick = null;
-    }
-
-    // 快速简化版交互函数（省略详细实现以保持示例简洁）
-    function setupFluffInteraction() {/*...*/}
-    function setupCreamInteraction() {
-      isDrawing = false;
-      let lastTime = 0;
-      const draw = (e) => {
-        if (!isDrawing) return;
-        e.preventDefault();
-        const now = Date.now();
-        if (now - lastTime < 50) return;
-        lastTime = now;
-        const rect = cakeArea.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-        const cream = document.createElement('div');
-        cream.className = 'cream-drop';
-        cream.style.left = (x - 5) + 'px';
-        cream.style.top = (y - 5) + 'px';
-        decorLayer.appendChild(cream);
-        decorations.push(cream);
-      };
-      cakeArea.onmousedown = () => isDrawing = true;
-      cakeArea.onmousemove = draw;
-      cakeArea.onmouseup = () => isDrawing = false;
-      cakeArea.onmouseleave = () => isDrawing = false;
-      cakeArea.ontouchstart = (e) => { e.preventDefault(); isDrawing = true; };
-      cakeArea.ontouchmove = (e) => { e.preventDefault(); draw(e); };
-      cakeArea.ontouchend = () => isDrawing = false;
-    }
-    function setupFruitInteraction() {
-      const fruits = ['🍓', '🍒', '🫐', '🍇'];
-      cakeArea.onclick = (e) => {
-        const rect = cakeArea.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const fruit = document.createElement('div');
-        fruit.className = 'falling-fruit';
-        fruit.textContent = fruits[Math.floor(Math.random() * fruits.length)];
-        fruit.style.left = (x - 12) + 'px';
-        fruit.style.top = (y - 12) + 'px';
-        decorLayer.appendChild(fruit);
-        decorations.push(fruit);
-        playSound('pop');
-      };
-    }
-    function setupCandleInteraction() {
-      candleCount = 0;
-      cakeArea.onclick = (e) => {
-        if (candleCount >= 5) return;
-        const rect = cakeArea.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const candle = document.createElement('div');
-        candle.className = 'candle';
-        candle.textContent = '🕯️';
-        candle.style.left = (x - 24) + 'px';
-        candle.style.top = (y - 48) + 'px';
-        decorLayer.appendChild(candle);
-        decorations.push(candle);
-        candleCount++;
-        playSound('pop');
-      };
-    }
-    function setupLightInteraction() {
-      cakeArea.onclick = (e) => {
-        const candles = decorLayer.querySelectorAll('.candle:not(.lit)');
-        if (candles.length === 0) {
-          if (candleCount > 0) nextStep();
-          return;
-        }
-        const rect = cakeArea.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        candles.forEach(candle => {
-          const cx = parseFloat(candle.style.left) + 24;
-          const cy = parseFloat(candle.style.top) + 48;
-          const dist = Math.hypot(clickX - cx, clickY - cy);
-          if (dist < 60) {
-            candle.classList.add('lit');
-            playSound('pop');
-            if (candles.length === 1) setTimeout(nextStep, 1000);
+      
+      if (step.action === 'fluff') {
+        let pressing = false;
+        workImage.style.cursor = 'grab';
+        
+        const start = (e) => {
+          e.preventDefault();
+          pressing = true;
+          workImage.style.transform = 'scale(0.92, 1.08)';
+          const interval = setInterval(() => {
+            if (!pressing) { clearInterval(interval); return; }
+            fluffiness = Math.min(fluffiness + 5, 100);
+            updateProgressDisplay();
+            if (fluffiness >= 100) {
+              clearInterval(interval);
+              showToast('蛋糕已经很蓬松了！');
+              setTimeout(nextStep, 500);
+            }
+          }, 100);
+        };
+        
+        const end = () => {
+          pressing = false;
+          workImage.style.transform = 'scale(1)';
+        };
+        
+        cakeArea.onmousedown = start;
+        cakeArea.onmouseup = end;
+        cakeArea.onmouseleave = end;
+        cakeArea.ontouchstart = (e) => start(e.touches[0]);
+        cakeArea.ontouchend = end;
+      }
+      
+      else if (step.action === 'cream') {
+        cakeArea.style.cursor = 'crosshair';
+        let lastX, lastY;
+        
+        const addCream = (x, y) => {
+          const cream = document.createElement('div');
+          cream.className = 'cream-flower';
+          cream.innerHTML = `<svg viewBox="0 0 24 24" style="filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));"><defs><radialGradient id="cg" cx="50%" cy="40%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#ffe4e1"/></defs><g fill="url(#cg)"><ellipse cx="12" cy="6" rx="3" ry="4"/><ellipse cx="6" cy="10" rx="3" ry="4" transform="rotate(60 6 10)"/><ellipse cx="18" cy="10" rx="3" ry="4" transform="rotate(-60 18 10)"/><ellipse cx="9" cy="18" rx="3" ry="4" transform="rotate(120 9 18)"/><ellipse cx="15" cy="18" rx="3" ry="4" transform="rotate(-120 15 18)"/><circle cx="12" cy="12" r="4" fill="white"/></g></svg>`;
+          cream.style.left = (x - 12) + 'px';
+          cream.style.top = (y - 12) + 'px';
+          cream.style.width = (18 + Math.random() * 12) + 'px';
+          cream.style.height = cream.style.width;
+          decorLayer.appendChild(cream);
+          decorations.push({step: currentStep, el: cream});
+          
+          if (decorLayer.querySelectorAll('.cream-flower').length > 60) {
+            decorLayer.querySelector('.cream-flower').remove();
           }
-        });
-      };
-    }
-    function setupDecorateInteraction() {
-      // 第六步保持之前所有的装饰，添加拖拽功能
+        };
+        
+        cakeArea.onmousedown = (e) => {
+          isDrawing = true;
+          const rect = cakeArea.getBoundingClientRect();
+          lastX = e.clientX - rect.left;
+          lastY = e.clientY - rect.top;
+          addCream(lastX, lastY);
+        };
+        
+        cakeArea.onmousemove = (e) => {
+          if (!isDrawing) return;
+          const rect = cakeArea.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          if (Math.hypot(x-lastX, y-lastY) > 12) {
+            addCream(x, y);
+            lastX = x; lastY = y;
+          }
+        };
+        
+        cakeArea.onmouseup = cakeArea.onmouseleave = () => isDrawing = false;
+        
+        cakeArea.ontouchstart = (e) => {
+          e.preventDefault();
+          isDrawing = true;
+          const rect = cakeArea.getBoundingClientRect();
+          addCream(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+        };
+        
+        cakeArea.ontouchmove = (e) => {
+          e.preventDefault();
+          if (!isDrawing) return;
+          const rect = cakeArea.getBoundingClientRect();
+          addCream(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+        };
+        
+        cakeArea.ontouchend = () => isDrawing = false;
+      }
+      
+      else if (step.action === 'fruit') {
+        cakeArea.style.cursor = 'copy';
+        let count = 0;
+        cakeArea.onclick = (e) => {
+          const rect = cakeArea.getBoundingClientRect();
+          const fruit = document.createElement('div');
+          fruit.className = 'static-fruit';
+          fruit.textContent = fruits[Math.floor(Math.random() * fruits.length)];
+          fruit.style.left = (e.clientX - rect.left - 13) + 'px';
+          fruit.style.top = (e.clientY - rect.top - 13) + 'px';
+          decorLayer.appendChild(fruit);
+          decorations.push({step: currentStep, el: fruit});
+          count++;
+          updateProgressDisplay(count, 10);
+        };
+      }
+      
+      else if (step.action === 'candle') {
+        cakeArea.style.cursor = 'pointer';
+        candleCount = 0;
+        updateProgressDisplay(0, 5);
+        
+        cakeArea.onclick = (e) => {
+          if (candleCount >= 5) { showToast('最多5根蜡烛！'); return; }
+          const rect = cakeArea.getBoundingClientRect();
+          const candle = document.createElement('div');
+          candle.className = 'candle';
+          candle.textContent = '🕯️';
+          candle.style.left = (e.clientX - rect.left - 24) + 'px';
+          candle.style.top = (e.clientY - rect.top - 48) + 'px';
+          decorLayer.appendChild(candle);
+          decorations.push({step: currentStep, el: candle});
+          candleCount++;
+          updateProgressDisplay(candleCount, 5);
+          if (candleCount === 5) setTimeout(nextStep, 800);
+        };
+      }
+      
+      else if (step.action === 'light') {
+        cakeArea.onclick = (e) => {
+          const rect = cakeArea.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const clickY = e.clientY - rect.top;
+          const unlit = decorLayer.querySelectorAll('.candle:not(.lit)');
+          
+          if (unlit.length === 0 && candleCount > 0) { nextStep(); return; }
+          
+          let litAny = false;
+          unlit.forEach(candle => {
+            const cx = parseFloat(candle.style.left) + 24;
+            const cy = parseFloat(candle.style.top) + 24;
+            if (Math.hypot(clickX - cx, clickY - cy) < 70) {
+              candle.classList.add('lit');
+              litAny = true;
+              // 火花
+              for (let i = 0; i < 6; i++) {
+                const spark = document.createElement('div');
+                spark.style.cssText = `position:absolute;left:${cx}px;top:${cy}px;width:4px;height:4px;background:#ffd93d;border-radius:50%;z-index:30;pointer-events:none;`;
+                decorLayer.appendChild(spark);
+                const ang = (Math.PI*2/6)*i;
+                spark.animate([{transform:'translate(0,0)',opacity:1}, {transform:`translate(${Math.cos(ang)*40}px,${Math.sin(ang)*40}px)`,opacity:0}], {duration:600}).onfinish = () => spark.remove();
+              }
+            }
+          });
+          
+          if (litAny && decorLayer.querySelectorAll('.candle:not(.lit)').length === 0) {
+            showToast('✨ 全部点燃了！');
+            setTimeout(nextStep, 1000);
+          }
+        };
+      }
     }
 
     function createEmojiPalette() {
-      emojiPalette.innerHTML = '';
+      const palette = document.getElementById('emojiPalette');
+      palette.innerHTML = '';
       emojis.forEach(emoji => {
         const item = document.createElement('div');
         item.className = 'emoji-item';
         item.textContent = emoji;
-        item.dataset.emoji = emoji;
         
-        const startDrag = (clientX, clientY, emojiChar) => {
+        const drag = (x, y) => {
           const ghost = document.createElement('div');
           ghost.className = 'dragging-ghost';
-          ghost.textContent = emojiChar;
-          ghost.style.left = (clientX - 18) + 'px';
-          ghost.style.top = (clientY - 18) + 'px';
+          ghost.textContent = emoji;
+          ghost.style.left = x + 'px';
+          ghost.style.top = y + 'px';
           document.body.appendChild(ghost);
-          playSound('pop');
           
-          const moveHandler = (e) => {
-            const x = e.clientX || (e.touches && e.touches[0].clientX);
-            const y = e.clientY || (e.touches && e.touches[0].clientY);
-            if (x && y) {
-              ghost.style.left = (x - 18) + 'px';
-              ghost.style.top = (y - 18) + 'px';
-            }
+          const move = (e) => {
+            const cx = e.clientX || e.touches?.[0].clientX;
+            const cy = e.clientY || e.touches?.[0].clientY;
+            if (cx) { ghost.style.left = cx + 'px'; ghost.style.top = cy + 'px'; }
           };
           
-          const endHandler = (e) => {
-            const x = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
-            const y = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
-            const rect = cakeArea.getBoundingClientRect();
-            
-            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-              const el = document.createElement('div');
-              el.className = 'decoration-emoji';
-              el.textContent = emojiChar;
-              el.style.left = (x - rect.left - 14) + 'px';
-              el.style.top = (y - rect.top - 14) + 'px';
-              decorLayer.appendChild(el);
-              decorations.push(el);
-              playSound('pop');
+          const end = (e) => {
+            const cx = e.clientX || e.changedTouches?.[0].clientX;
+            const cy = e.clientY || e.changedTouches?.[0].clientY;
+            const rect = document.getElementById('cakeArea').getBoundingClientRect();
+            if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
+              const dec = document.createElement('div');
+              dec.className = 'decoration-emoji';
+              dec.textContent = emoji;
+              dec.style.left = (cx - rect.left - 14) + 'px';
+              dec.style.top = (cy - rect.top - 14) + 'px';
+              document.getElementById('decorationsLayer').appendChild(dec);
+              decorations.push({step: 5, el: dec});
             }
-            
             ghost.remove();
-            document.removeEventListener('mousemove', moveHandler);
-            document.removeEventListener('touchmove', moveHandler);
-            document.removeEventListener('mouseup', endHandler);
-            document.removeEventListener('touchend', endHandler);
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', end);
+            document.removeEventListener('touchmove', move);
+            document.removeEventListener('touchend', end);
           };
           
-          document.addEventListener('mousemove', moveHandler);
-          document.addEventListener('touchmove', moveHandler, { passive: false });
-          document.addEventListener('mouseup', endHandler);
-          document.addEventListener('touchend', endHandler);
+          document.addEventListener('mousemove', move);
+          document.addEventListener('mouseup', end);
+          document.addEventListener('touchmove', move, {passive:false});
+          document.addEventListener('touchend', end);
         };
         
-        item.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          startDrag(e.clientX, e.clientY, emoji);
-        });
-        
-        item.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          if (e.touches[0]) {
-            startDrag(e.touches[0].clientX, e.touches[0].clientY, emoji);
-          }
-        }, { passive: false });
-        
-        emojiPalette.appendChild(item);
+        item.onmousedown = (e) => { e.preventDefault(); drag(e.clientX, e.clientY); };
+        item.ontouchstart = (e) => { e.preventDefault(); drag(e.touches[0].clientX, e.touches[0].clientY); };
+        palette.appendChild(item);
       });
     }
 
-    function nextStep() {
-      if (currentStep < steps.length - 1) {
-        currentStep++;
-        playSound('pop');
-        updateStep();
-      }
+    function updateProgressDisplay(cur, max) {
+      const fill = document.getElementById('progressFill');
+      if (currentStep === 0) fill.style.width = fluffiness + '%';
+      else if (cur !== undefined) fill.style.width = (cur/max*100) + '%';
     }
 
+    function undoLast() {
+      for (let i = decorations.length - 1; i >= 0; i--) {
+        if (decorations[i].step === currentStep) {
+          decorations[i].el.remove();
+          decorations.splice(i, 1);
+          showToast('已撤销');
+          return;
+        }
+      }
+      showToast('没有可撤销的');
+    }
+
+    function prevStep() { if (currentStep > 0) { currentStep--; updateStep(); } }
+    function nextStep() { if (currentStep < steps.length - 1) { currentStep++; updateStep(); } }
+
     function resetStep() {
-      decorLayer.innerHTML = '';
-      decorations = [];
-      candleCount = 0;
-      playSound('pop');
+      decorations = decorations.filter(d => {
+        if (d.step === currentStep) { d.el.remove(); return false; }
+        return true;
+      });
+      if (currentStep === 0) fluffiness = 0;
+      if (currentStep === 3) candleCount = 0;
       updateStep();
+      showToast('已重置');
     }
 
     function finish() {
-      playSound('complete');
-      const playerCake = document.getElementById('playerCake');
-      const clone = cakeArea.cloneNode(true);
-      clone.style.width = '100%';
-      clone.style.height = '100%';
-      playerCake.innerHTML = '';
-      playerCake.appendChild(clone);
-      
       document.getElementById('makeStage').style.display = 'none';
       document.getElementById('resultPage').style.display = 'block';
+      const playerCake = document.getElementById('playerCake');
+      playerCake.innerHTML = '';
       
-      // 简单的庆祝彩纸
-      const celebration = document.getElementById('celebration');
-      const symbols = ['🎀', '🎉', '🎈', '🎁', '✨', '💖'];
-      for (let i = 0; i < 30; i++) {
+      // 克隆最终作品
+      const baseImg = document.getElementById('workImage').cloneNode();
+      baseImg.style.position = 'absolute';
+      baseImg.style.top = '0';
+      baseImg.style.left = '0';
+      baseImg.style.width = '100%';
+      baseImg.style.height = '100%';
+      
+      const decorClone = document.getElementById('decorationsLayer').cloneNode(true);
+      decorClone.style.position = 'absolute';
+      decorClone.style.top = '0';
+      decorClone.style.left = '0';
+      decorClone.style.width = '100%';
+      decorClone.style.height = '100%';
+      
+      playerCake.appendChild(baseImg);
+      playerCake.appendChild(decorClone);
+      
+      // 撒花
+      const cel = document.getElementById('celebration');
+      for (let i = 0; i < 50; i++) {
         setTimeout(() => {
           const c = document.createElement('div');
           c.className = 'confetti';
-          c.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-          c.style.left = Math.random() * 100 + 'vw';
-          c.style.animationDuration = (3 + Math.random() * 2) + 's';
-          c.style.fontSize = (20 + Math.random() * 20) + 'px';
-          celebration.appendChild(c);
-          setTimeout(() => c.remove(), 4000);
-        }, i * 50);
+          c.textContent = ['🎀','🎉','🎈','🎁','✨','💖'][Math.floor(Math.random()*6)];
+          c.style.left = Math.random()*100 + 'vw';
+          c.style.animationDuration = (3+Math.random()*2)+'s';
+          cel.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i*40);
       }
     }
 
     // 启动
-    init();
+    updateStep();
   </script>
 </body>
 </html>
+
