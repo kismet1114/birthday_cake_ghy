@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>奶糕的生日派对蛋糕制作 - 优化版</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+    
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+      margin: 0; 
+      padding: 0; 
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      touch-action: manipulation;
+    }
+    
+    body {
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #ffe6f0 0%, #f8d7ff 50%, #e1f5fe 100%);
+      font-family: "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1000px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.5);
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 装饰背景 */
+    .main-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,182,193,0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    h1 {
+      color: #d32f2f;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 25px;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    h1::after {
+      content: '✨';
+      position: absolute;
+      margin-left: 10px;
+      animation: sparkle 2s infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 20%;
+      right: 20%;
+      height: 2px;
+      background: linear-gradient(to right, #c44569, #e91e63);
+      transform: translateY(-50%);
+      z-index: 0;
+      opacity: 0.3;
+    }
+    
+    .step-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      position: relative;
+      z-index: 1;
+      border: 2px solid transparent;
+    }
+    
+    .step-dot.active { 
+      background: #e91e63; 
+      width: 35px; 
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(233, 30, 99, 0.5);
+    }
+    
+    .step-dot.completed { 
+      background: #c44569; 
+      border-color: #fff;
+      transform: scale(1.1);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+      .workspace { grid-template-columns: 1fr; gap: 20px; }
+      body { padding: 10px; }
+      .main-container { padding: 20px; }
+      h1 { font-size: 24px; }
+    }
+
+    .guide-panel, .work-panel {
+      background: linear-gradient(135deg, #fff9fc, #fff0f5);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      border: 2px solid rgba(255, 182, 193, 0.3);
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .work-panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .guide-label, .work-label {
+      display: inline-block;
+      background: linear-gradient(135deg, #e91e63, #c2185b);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(233, 30, 99, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .work-label {
+      background: linear-gradient(135deg, #ff6b9d, #e91e63);
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .guide-image {
+      width: 100%;
+      max-width: 280px;
+      height: 280px;
+      object-fit: contain;
+      border-radius: 16px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
+      transition: transform 0.3s;
+    }
+    
+    .guide-image:hover {
+      transform: scale(1.02);
+    }
+
+    .guide-text {
+      color: #666;
+      font-size: 14px;
+      margin-top: 10px;
+      line-height: 1.5;
+      padding: 0 10px;
+    }
+
+    .instruction-text {
+      color: #e91e63;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0 15px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 10px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,240,245,0.8));
+      border-radius: 12px;
+      border: 1px dashed rgba(233, 30, 99, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .instruction-text::before {
+      content: '💡';
+      margin-right: 8px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .cake-workspace {
+      position: relative;
+      width: 100%;
+      max-width: 350px;
+      height: 350px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,249,252,0.8));
+      border-radius: 16px;
+      overflow: visible;
+      cursor: default;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    }
+
+    /* 不同步骤的鼠标样式 */
+    .cake-workspace.mode-fluff { cursor: grab; }
+    .cake-workspace.mode-cream { cursor: crosshair; }
+    .cake-workspace.mode-fruit { cursor: copy; }
+    .cake-workspace.mode-candle { cursor: pointer; }
+    .cake-workspace.mode-light { cursor: pointer; }
+
+    .cake-base-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+      z-index: 1;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .decorations-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* 优化后的奶油 - 带轻微旋转和不同大小 */
+    .cream-flower {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 15;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+      animation: creamGrow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes creamGrow {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      70% { transform: scale(1.2) rotate(var(--rotation, 0deg)); opacity: 1; }
+      100% { transform: scale(1) rotate(var(--rotation, 0deg)); opacity: 1; }
+    }
+
+    /* 水果 - 添加弹跳落地动画 */
+    .static-fruit {
+      position: absolute;
+      font-size: 26px;
+      z-index: 16;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+      background: transparent !important;
+      pointer-events: none;
+      line-height: 1;
+      animation: fruitDrop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    @keyframes fruitDrop {
+      0% { transform: scale(0) translateY(-20px); opacity: 0; }
+      60% { transform: scale(1.2) translateY(5px); opacity: 1; }
+      100% { transform: scale(1) translateY(0) rotate(var(--rotation, 0deg)); opacity: 1; }
+    }
+
+    /* 蜡烛 - 添加插入动画 */
+    .candle {
+      position: absolute;
+      font-size: 48px;
+      cursor: pointer;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+      z-index: 20;
+      transition: transform 0.2s;
+      background: transparent !important;
+      pointer-events: auto;
+      line-height: 1;
+      animation: candleInsert 0.3s ease-out forwards;
+    }
+
+    @keyframes candleInsert {
+      0% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .candle:hover { transform: scale(1.1) translateY(-5px); }
+    
+    .candle.lit {
+      animation: flicker 0.8s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 10px #ff6b35) drop-shadow(0 0 20px #ffd93d) drop-shadow(0 0 30px rgba(255,107,53,0.5));
+    }
+    
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); filter: drop-shadow(0 0 10px #ff6b35) drop-shadow(0 0 20px #ffd93d) brightness(1); }
+      100% { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 15px #ff6b35) drop-shadow(0 0 25px #ffd93d) brightness(1.2); }
+    }
+
+    /* 火花效果 */
+    .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #ffd93d;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sparkleFly 0.8s ease-out forwards;
+      z-index: 25;
+    }
+
+    @keyframes sparkleFly {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+
+    .decoration-emoji {
+      position: absolute;
+      font-size: 28px;
+      z-index: 20;
+      background: transparent !important;
+      pointer-events: none;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      animation: decorPlace 0.3s ease-out forwards;
+    }
+
+    @keyframes decorPlace {
+      0% { transform: scale(0); opacity: 0; }
+      80% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 进度指示器 */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 3px;
+      margin: 10px 0;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .progress-bar.active { display: block; }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b9d, #e91e63);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .emoji-palette {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      border: 1px solid rgba(233, 30, 99, 0.1);
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .emoji-item {
+      width: 45px;
+      height: 45px;
+      font-size: 24px;
+      cursor: grab;
+      background: linear-gradient(135deg, #ffffff, #f8f9fa);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+      position: relative;
+      user-select: none;
+    }
+    
+    .emoji-item:active {
+      cursor: grabbing;
+      transform: scale(0.9);
+    }
+    
+    .emoji-item:hover { 
+      transform: translateY(-3px) scale(1.1); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #d32f2f, #b71c1c);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(211,47,47,0.3), 0 0 0 2px rgba(255,255,255,0.5) inset;
+      transition: all 0.3s;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      transform: scale(0);
+    }
+    
+    .btn:hover::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .btn:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 6px 20px rgba(211,47,47,0.4);
+    }
+    
+    .btn:active { transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      color: #d32f2f;
+      box-shadow: 0 4px 12px rgba(255,154,158,0.3), 0 0 0 2px rgba(255,255,255,0.5) inset;
+    }
+    
+    .btn-secondary:hover {
+      box-shadow: 0 6px 20px rgba(255,154,158,0.4);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .result-page {
+      display: none;
+      animation: fadeIn 1s ease;
+    }
+
+    .result-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    @media (max-width: 768px) {
+      .result-compare { grid-template-columns: 1fr; }
+    }
+
+    .result-box {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      border: 2px solid rgba(255,182,193,0.3);
+    }
+
+    .result-label {
+      font-family: 'ZCOOL KuaiLe', cursive;
+      color: #e91e63;
+      font-size: 20px;
+      margin-bottom: 15px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .result-label::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 10%;
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #e91e63, transparent);
+      border-radius: 2px;
+    }
+
+    .final-cake-wrapper {
+      width: 100%;
+      max-width: 350px;
+      height: 350px;
+      margin: 0 auto;
+      position: relative;
+      background: linear-gradient(135deg, #fff9fc, #fff0f5);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .final-message {
+      font-size: 48px;
+      text-align: center;
+      margin: 30px 0;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      background: linear-gradient(45deg, #ff6b6b, #f9ca24, #ff9ff3, #6c5ce7);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 3s ease infinite;
+      text-shadow: none;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .celebration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    .confetti {
+      position: absolute;
+      font-size: 24px;
+      animation: fall linear forwards;
+    }
+    
+    @keyframes fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .dragging-ghost {
+      position: fixed;
+      font-size: 36px;
+      pointer-events: none;
+      z-index: 1000;
+      background: transparent !important;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      line-height: 1;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+
+    /* 撤销提示 */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* 粒子效果容器 */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container" id="makeStage">
+    <h1>🎂 奶糕的生日派对蛋糕制作</h1>
+    
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="workspace">
+      <div class="guide-panel">
+        <div class="guide-label">📖 制作指引</div>
+        <img src="images/1.jpg" class="guide-image" id="guideImage" alt="指引图">
+        <div class="guide-text" id="guideText">首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松</div>
+      </div>
+
+      <div class="work-panel">
+        <div class="work-label">👩‍🍳 你的工作台</div>
+        <div class="instruction-text" id="instruction">
+          第一步：按住蛋糕拍打，让面团膨胀！
+        </div>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="cake-workspace mode-fluff" id="cakeArea">
+          <img src="images/1.jpg" class="cake-base-img" id="workImage" alt="工作蛋糕">
+          <div class="decorations-layer" id="decorationsLayer"></div>
+          <div class="particles" id="particlesLayer"></div>
+        </div>
+
+        <div class="emoji-palette" id="emojiPalette" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-secondary" onclick="prevStep()" id="prevBtn" style="display: none;">⬅️ 上一步</button>
+      <button class="btn" onclick="nextStep()" id="nextBtn">下一步 👉</button>
+      <button class="btn btn-secondary" onclick="resetStep()" id="resetBtn" style="display: none;">重置 ↩️</button>
+      <button class="btn btn-secondary" onclick="undoLast()" id="undoBtn" style="display: none;">撤销 ↶</button>
+      <button class="btn" onclick="finish()" id="finishBtn" style="display: none;">完成派对！🎉</button>
+    </div>
+  </div>
+
+  <div class="result-page" id="resultPage" style="display: none;">
+    <h1 style="font-family: 'ZCOOL KuaiLe', cursive; color: #d32f2f; font-size: 32px; text-align: center;">✨ 大功告成 ✨</h1>
+    
+    <div class="result-compare">
+      <div class="result-box">
+        <div class="result-label">🎨 你制作的蛋糕</div>
+        <div class="final-cake-wrapper" id="playerCake"></div>
+      </div>
+      <div class="result-box">
+        <div class="result-label">✨ 完美成品参考</div>
+        <div class="final-cake-wrapper">
+          <img src="images/6.jpg" alt="成品蛋糕" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;">
+        </div>
+      </div>
+    </div>
+
+    <div class="final-message">高瀚宇<br>生日快乐！🎂</div>
+    <div class="button-group">
+      <button class="btn" onclick="location.reload()">再做一个 🔄</button>
+    </div>
+  </div>
+
+  <div class="celebration" id="celebration"></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const steps = [
+      { 
+        guide: 'images/1.jpg', 
+        work: 'images/1.jpg', 
+        instruction: '第一步：按住蛋糕拍打，让面团膨胀！', 
+        guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', 
+        action: 'fluff',
+        progress: true
+      },
+      { 
+        guide: 'images/2.jpg', 
+        work: 'images/2.jpg', 
+        instruction: '第二步：涂抹奶油（拖动鼠标涂抹）', 
+        guideText: '在蛋糕上均匀涂抹奶油', 
+        action: 'cream',
+        progress: false
+      },
+      { 
+        guide: 'images/3.jpg', 
+        work: 'images/2.jpg', 
+        instruction: '第三步：点击添加水果装饰', 
+        guideText: '挑选新鲜水果点缀蛋糕（点击蛋糕放置）', 
+        action: 'fruit',
+        progress: true
+      },
+      { 
+        guide: 'images/4.jpg', 
+        work: 'images/2.jpg', 
+        instruction: '第四步：插上生日蜡烛（最多5根）', 
+        guideText: '插上蜡烛准备庆祝（点击放置，最多5根）', 
+        action: 'candle',
+        progress: true
+      },
+      { 
+        guide: 'images/5.jpg', 
+        work: 'images/2.jpg', 
+        instruction: '第五步：点击蜡烛点燃它们！', 
+        guideText: '点击蜡烛点燃它们，全部点燃后自动进入下一步', 
+        action: 'light',
+        progress: false
+      },
+      { 
+        guide: 'images/6.jpg', 
+        work: 'images/2.jpg', 
+        instruction: '第六步：自由装饰 & 完成！（拖拽下方表情到蛋糕上）', 
+        guideText: '最后点缀，拖拽下方装饰物让蛋糕更完美！', 
+        action: 'decorate',
+        progress: false
+      }
+    ];
+
+    let currentStep = 0;
+    let fluffiness = 0;
+    let candleCount = 0;
+    let isDrawing = false;
+    let lastDecoration = null; // 用于撤销
+    
+    // 修改：不使用全局变量污染，而是动态获取元素
+    function getElements() {
+      return {
+        guideImage: document.getElementById('guideImage'),
+        workImage: document.getElementById('workImage'),
+        guideText: document.getElementById('guideText'),
+        instruction: document.getElementById('instruction'),
+        cakeArea: document.getElementById('cakeArea'),
+        decorLayer: document.getElementById('decorationsLayer'),
+        particlesLayer: document.getElementById('particlesLayer'),
+        emojiPalette: document.getElementById('emojiPalette'),
+        nextBtn: document.getElementById('nextBtn'),
+        prevBtn: document.getElementById('prevBtn'),
+        resetBtn: document.getElementById('resetBtn'),
+        finishBtn: document.getElementById('finishBtn'),
+        undoBtn: document.getElementById('undoBtn'),
+        progressBar: document.getElementById('progressBar'),
+        progressFill: document.getElementById('progressFill')
+      };
+    }
+
+    const emojis = ['🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🐱', '🎀', '💐', '🍑'];
+    
+    const fruits = ['🍓', '🍒', '🫐', '🍇', '🍑', '🍊', '🍋', '🍉'];
+
+    // SVG奶油花朵模板 - 随机大小和旋转
+    function getCreamSVG(rotation) {
+      return `
+        <svg width="100%" height="100%" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));">
+          <defs>
+            <radialGradient id="creamGrad${rotation}" cx="50%" cy="40%">
+              <stop offset="0%" style="stop-color:#fff; stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#fff5f5; stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ffe4e1; stop-opacity:1" />
+            </radialGradient>
+          </defs>
+          <g fill="url(#creamGrad${rotation})" stroke="rgba(0,0,0,0.05)" stroke-width="0.3">
+            <ellipse cx="12" cy="6" rx="3" ry="4" />
+            <ellipse cx="18" cy="10" rx="3" ry="4" transform="rotate(72 18 10)" />
+            <ellipse cx="15" cy="18" rx="3" ry="4" transform="rotate(144 15 18)" />
+            <ellipse cx="9" cy="18" rx="3" ry="4" transform="rotate(216 9 18)" />
+            <ellipse cx="6" cy="10" rx="3" ry="4" transform="rotate(288 6 10)" />
+            <circle cx="12" cy="12" r="3.5" fill="#fff" />
+          </g>
+          <ellipse cx="9" cy="8" rx="1.5" ry="1" fill="rgba(255,255,255,0.8)" transform="rotate(-30 9 8)" />
+        </svg>
+      `;
+    }
+
+    // 显示提示
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function init() { updateStep(); }
+
+    function updateStep() {
+      const els = getElements();
+      const step = steps[currentStep];
+      
+      // 更新步骤指示器
+      document.querySelectorAll('.step-dot').forEach((dot, idx) => {
+        dot.classList.remove('active', 'completed');
+        if (idx < currentStep) dot.classList.add('completed');
+        if (idx === currentStep) dot.classList.add('active');
+      });
+
+      // 添加淡入动画
+      els.guideImage.style.opacity = '0';
+      els.workImage.style.opacity = '0';
+      
+      setTimeout(() => {
+        els.guideImage.src = step.guide;
+        els.workImage.src = step.work;
+        els.guideImage.onload = () => { els.guideImage.style.opacity = '1'; };
+        els.workImage.onload = () => { els.workImage.style.opacity = '1'; };
+      }, 200);
+      
+      els.guideText.textContent = step.guideText;
+      els.instruction.textContent = step.instruction;
+      
+      // 设置鼠标样式
+      els.cakeArea.className = 'cake-workspace mode-' + step.action;
+      
+      // 更新进度条
+      if (step.progress) {
+        els.progressBar.classList.add('active');
+        updateProgress();
+      } else {
+        els.progressBar.classList.remove('active');
+      }
+      
+      // 重置交互
+      setupInteractions();
+      
+      // 按钮显示逻辑
+      els.prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+      els.resetBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+      els.undoBtn.style.display = (currentStep >= 2 && currentStep <= 4) ? 'inline-block' : 'none';
+      
+      if (currentStep === 5) {
+        els.nextBtn.style.display = 'none';
+        els.finishBtn.style.display = 'inline-block';
+        els.emojiPalette.style.display = 'flex';
+        createEmojiPalette();
+      } else {
+        els.nextBtn.style.display = 'inline-block';
+        els.finishBtn.style.display = 'none';
+        els.emojiPalette.style.display = 'none';
+        els.undoBtn.style.display = 'none';
+      }
+      
+      // 最后一步禁用下一步按钮直到有装饰
+      if (currentStep === 5) {
+        els.nextBtn.style.display = 'none';
+      }
+    }
+
+    function setupInteractions() {
+      const els = getElements();
+      const step = steps[currentStep];
+      
+      // 清除旧事件（克隆节点方式，彻底清除）
+      const newArea = els.cakeArea.cloneNode(true);
+      els.cakeArea.parentNode.replaceChild(newArea, document.getElementById('cakeArea'));
+      
+      // 重新获取引用（因为DOM被替换了）
+      const cakeArea = document.getElementById('cakeArea');
+      const workImage = document.getElementById('workImage');
+      const decorLayer = document.getElementById('decorationsLayer');
+      const particlesLayer = document.getElementById('particlesLayer');
+      
+      // 根据步骤设置新事件
+      if (step.action === 'fluff') setupFluffInteraction(cakeArea, workImage, particlesLayer);
+      if (step.action === 'cream') setupCreamInteraction(cakeArea, decorLayer);
+      if (step.action === 'fruit') setupFruitInteraction(cakeArea, decorLayer);
+      if (step.action === 'candle') setupCandleInteraction(cakeArea, decorLayer);
+      if (step.action === 'light') setupLightInteraction(cakeArea, decorLayer, particlesLayer);
+      if (step.action === 'decorate') setupDecorateInteraction(cakeArea);
+    }
+
+    // 第一步：拍打 - 增加粒子效果
+    function setupFluffInteraction(cakeArea, workImage, particlesLayer) {
+      let isPressed = false;
+      let pressInterval;
+      
+      workImage.style.transition = 'transform 0.15s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+      
+      const startPress = (e) => {
+        e.preventDefault();
+        isPressed = true;
+        workImage.style.transform = 'scaleY(0.85) scaleX(1.08)';
+        
+        // 创建面粉粒子
+        createParticle(particlesLayer, e);
+        
+        // 持续按压时增加蓬松度
+        pressInterval = setInterval(() => {
+          if (isPressed) {
+            fluffiness = Math.min(fluffiness + 5, 100);
+            updateProgress();
+            if (Math.random() > 0.7) createParticle(particlesLayer);
+            
+            if (fluffiness >= 100 && !workImage.classList.contains('done')) {
+              workImage.classList.add('done');
+              setTimeout(() => {
+                showToast('蛋糕已经很蓬松了！');
+                setTimeout(nextStep, 800);
+              }, 300);
+            }
+          }
+        }, 100);
+      };
+      
+      const endPress = () => {
+        if (!isPressed) return;
+        isPressed = false;
+        clearInterval(pressInterval);
+        workImage.style.transform = 'scaleY(1) scaleX(1)';
+        fluffiness = Math.min(fluffiness + 15, 100);
+        updateProgress();
+      };
+      
+      cakeArea.addEventListener('mousedown', startPress);
+      cakeArea.addEventListener('mouseup', endPress);
+      cakeArea.addEventListener('mouseleave', endPress);
+      cakeArea.addEventListener('touchstart', (e) => { startPress(e.touches[0]); }, {passive: false});
+      cakeArea.addEventListener('touchend', endPress);
+    }
+
+    function createParticle(container, e) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const rect = container.getBoundingClientRect();
+      let x, y;
+      
+      if (e && e.clientX) {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+      } else {
+        // 随机位置在蛋糕中心区域
+        x = rect.width/2 + (Math.random() - 0.5) * 100;
+        y = rect.height/2 + (Math.random() - 0.5) * 80;
+      }
+      
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.background = `hsl(${Math.random() * 60 + 300}, 100%, 85%)`;
+      p.style.width = (Math.random() * 8 + 4) + 'px';
+      p.style.height = p.style.width;
+      
+      // 飞散动画
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 50 + 30;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance - 50; // 向上偏移
+      
+      p.style.transition = 'all 0.8s ease-out';
+      container.appendChild(p);
+      
+      requestAnimationFrame(() => {
+        p.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+        p.style.opacity = '0';
+      });
+      
+      setTimeout(() => p.remove(), 800);
+    }
+
+    // 第二步：涂奶油 - 优化体验
+    function setupCreamInteraction(cakeArea, decorLayer) {
+      isDrawing = false;
+      let lastX = 0, lastY = 0;
+      
+      cakeArea.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const rect = cakeArea.getBoundingClientRect();
+        lastX = e.clientX - rect.left;
+        lastY = e.clientY - rect.top;
+        addCream(lastX, lastY, decorLayer);
+      });
+      
+      cakeArea.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        const rect = cakeArea.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // 距离检查，避免过于密集
+        const dist = Math.hypot(x - lastX, y - lastY);
+        if (dist > 15) { // 每15像素添加一个
+          addCream(x, y, decorLayer);
+          lastX = x;
+          lastY = y;
+        }
+      });
+      
+      cakeArea.addEventListener('mouseup', () => isDrawing = false);
+      cakeArea.addEventListener('mouseleave', () => isDrawing = false);
+      
+      // 触摸支持
+      cakeArea.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const touch = e.touches[0];
+        const rect = cakeArea.getBoundingClientRect();
+        addCream(touch.clientX - rect.left, touch.clientY - rect.top, decorLayer);
+      }, {passive: false});
+      
+      cakeArea.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        const rect = cakeArea.getBoundingClientRect();
+        addCream(touch.clientX - rect.left, touch.clientY - rect.top, decorLayer);
+      }, {passive: false});
+      
+      cakeArea.addEventListener('touchend', () => isDrawing = false);
+    }
+
+    function addCream(x, y, decorLayer) {
+      const cream = document.createElement('div');
+      cream.className = 'cream-flower';
+      const rotation = Math.floor(Math.random() * 360);
+      cream.style.setProperty('--rotation', rotation + 'deg');
+      cream.innerHTML = getCreamSVG(rotation);
+      cream.style.left = (x - 12) + 'px';
+      cream.style.top = (y - 12) + 'px';
+      cream.style.width = (20 + Math.random() * 8) + 'px'; // 随机大小
+      cream.style.height = cream.style.width;
+      
+      decorLayer.appendChild(cream);
+      lastDecoration = { type: 'cream', element: cream };
+      
+      // 限制数量
+      const creams = decorLayer.querySelectorAll('.cream-flower');
+      if (creams.length > 60) creams[0].remove();
+    }
+
+    // 第三步：水果 - 添加弹跳动画
+    function setupFruitInteraction(cakeArea, decorLayer) {
+      let fruitCount = 0;
+      
+      cakeArea.addEventListener('click', (e) => {
+        const rect = cakeArea.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const fruit = document.createElement('div');
+        fruit.className = 'static-fruit';
+        const type = fruits[Math.floor(Math.random() * fruits.length)];
+        fruit.textContent = type;
+        fruit.style.left = (x - 13) + 'px';
+        fruit.style.top = (y - 13) + 'px';
+        const rot = (Math.random() - 0.5) * 40;
+        fruit.style.setProperty('--rotation', rot + 'deg');
+        
+        decorLayer.appendChild(fruit);
+        lastDecoration = { type: 'fruit', element: fruit };
+        
+        fruitCount++;
+        updateProgress(fruitCount, 10); // 假设目标是10个水果
+        
+        // 播放音效模拟（视觉反馈）
+        createClickFeedback(x, y, cakeArea);
+      });
+    }
+
+    // 第四步：插蜡烛
+    function setupCandleInteraction(cakeArea, decorLayer) {
+      candleCount = 0;
+      updateProgress(0, 5);
+      
+      cakeArea.addEventListener('click', (e) => {
+        if (candleCount >= 5) {
+          showToast('最多只能插5根蜡烛哦！');
+          return;
+        }
+        
+        const rect = cakeArea.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const candle = document.createElement('div');
+        candle.className = 'candle';
+        candle.textContent = '🕯️';
+        candle.style.left = (x - 24) + 'px';
+        candle.style.top = (y - 48) + 'px';
+        
+        decorLayer.appendChild(candle);
+        lastDecoration = { type: 'candle', element: candle };
+        
+        candleCount++;
+        updateProgress(candleCount, 5);
+        
+        if (candleCount >= 5) {
+          setTimeout(() => {
+            showToast('蜡烛插满了，准备点燃！');
+            setTimeout(nextStep, 1000);
+          }, 300);
+        }
+      });
+    }
+
+    // 第五步：点蜡烛
+    function setupLightInteraction(cakeArea, decorLayer, particlesLayer) {
+      cakeArea.addEventListener('click', (e) => {
+        const unlit = decorLayer.querySelectorAll('.candle:not(.lit)');
+        
+        if (unlit.length === 0) {
+          if (candleCount > 0) {
+            setTimeout(nextStep, 500);
+          }
+          return;
+        }
+        
+        const rect = cakeArea.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        
+        let litCount = 0;
+        unlit.forEach(candle => {
+          const cx = parseFloat(candle.style.left) + 24;
+          const cy = parseFloat(candle.style.top) + 24; // 火焰位置
+          const dist = Math.hypot(clickX - cx, clickY - cy);
+          
+          if (dist < 80) { // 增大点击范围
+            candle.classList.add('lit');
+            candle.textContent = '🕯️'; // 可以换成点燃的图标如果有的话
+            litCount++;
+            
+            // 火花效果
+            for (let i = 0; i < 8; i++) {
+              setTimeout(() => createSparkle(particlesLayer, cx, cy), i * 50);
+            }
+          }
+        });
+        
+        if (litCount > 0) {
+          checkAllLit(decorLayer);
+        }
+      });
+    }
+
+    function createSparkle(container, x, y) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.left = x + 'px';
+      s.style.top = (y - 20) + 'px';
+      const angle = (Math.random() - 0.5) * Math.PI; // 向上扇形
+      const dist = Math.random() * 40 + 20;
+      s.style.setProperty('--tx', Math.sin(angle) * dist + 'px');
+      s.style.setProperty('--ty', -Math.cos(angle) * dist + 'px');
+      container.appendChild(s);
+      setTimeout(() => s.remove(), 800);
+    }
+
+    function checkAllLit(decorLayer) {
+      const unlit = decorLayer.querySelectorAll('.candle:not(.lit)');
+      if (unlit.length === 0 && candleCount > 0) {
+        showToast('✨ 全部点燃了！');
+        setTimeout(nextStep, 1500);
+      }
+    }
+
+    // 第六步：自由装饰
+    function setupDecorateInteraction(cakeArea) {
+      // 主要由palette处理，这里只接收放置
+    }
+
+    function createEmojiPalette() {
+      const els = getElements();
+      els.emojiPalette.innerHTML = '';
+      
+      emojis.forEach(emoji => {
+        const item = document.createElement('div');
+        item.className = 'emoji-item';
+        item.textContent = emoji;
+        
+        const startDrag = (clientX, clientY) => {
+          const ghost = document.createElement('div');
+          ghost.className = 'dragging-ghost';
+          ghost.textContent = emoji;
+          ghost.style.left = clientX + 'px';
+          ghost.style.top = clientY + 'px';
+          document.body.appendChild(ghost);
+          
+          const moveHandler = (e) => {
+            const cx = e.clientX || (e.touches && e.touches[0].clientX);
+            const cy = e.clientY || (e.touches && e.touches[0].clientY);
+            if (cx && cy) {
+              ghost.style.left = cx + 'px';
+              ghost.style.top = cy + 'px';
+            }
+          };
+          
+          const endHandler = (e) => {
+            const cx = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
+            const cy = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+            const cakeArea = document.getElementById('cakeArea');
+            const rect = cakeArea.getBoundingClientRect();
+            
+            if (cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom) {
+              const decorLayer = document.getElementById('decorationsLayer');
+              const el = document.createElement('div');
+              el.className = 'decoration-emoji';
+              el.textContent = emoji;
+              el.style.left = (cx - rect.left - 14) + 'px';
+              el.style.top = (cy - rect.top - 14) + 'px';
+              decorLayer.appendChild(el);
+              lastDecoration = { type: 'decor', element: el };
+              
+              // 放置反馈
+              createClickFeedback(cx - rect.left, cy - rect.top, cakeArea);
+            }
+            
+            ghost.remove();
+            document.removeEventListener('mousemove', moveHandler);
+            document.removeEventListener('touchmove', moveHandler);
+            document.removeEventListener('mouseup', endHandler);
+            document.removeEventListener('touchend', endHandler);
+          };
+          
+          document.addEventListener('mousemove', moveHandler);
+          document.addEventListener('touchmove', moveHandler, { passive: false });
+          document.addEventListener('mouseup', endHandler);
+          document.addEventListener('touchend', endHandler);
+        };
+        
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          startDrag(e.clientX, e.clientY);
+        });
+        
+        item.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          if (e.touches[0]) startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+        
+        els.emojiPalette.appendChild(item);
+      });
+    }
+
+    function createClickFeedback(x, y, container) {
+      const feedback = document.createElement('div');
+      feedback.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e91e63;
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        pointer-events: none;
+        z-index: 100;
+      `;
+      container.appendChild(feedback);
+      
+      requestAnimationFrame(() => {
+        feedback.style.transition = 'all 0.4s ease-out';
+        feedback.style.transform = 'translate(-50%, -50%) scale(2)';
+        feedback.style.opacity = '0';
+      });
+      
+      setTimeout(() => feedback.remove(), 400);
+    }
+
+    function updateProgress(current, max) {
+      const els = getElements();
+      if (currentStep === 0) {
+        els.progressFill.style.width = fluffiness + '%';
+      } else if (current !== undefined && max) {
+        els.progressFill.style.width = (current / max * 100) + '%';
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        // 保留装饰（不重置）
+        updateStep();
+      }
+    }
+
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        updateStep();
+      }
+    }
+
+    function resetStep() {
+      const els = getElements();
+      if (currentStep === 0) fluffiness = 0;
+      if (currentStep === 3) candleCount = 0;
+      
+      // 清除当前步骤的装饰
+      els.decorLayer.innerHTML = '';
+      updateStep();
+      showToast('已重置当前步骤 ✓');
+    }
+
+    function undoLast() {
+      if (lastDecoration && lastDecoration.element && lastDecoration.element.parentNode) {
+        lastDecoration.element.remove();
+        showToast('已撤销 ✓');
+        lastDecoration = null;
+      } else {
+        showToast('没有可撤销的操作');
+      }
+    }
+
+    function finish() {
+      const resultPage = document.getElementById('resultPage');
+      const makeStage = document.getElementById('makeStage');
+      const playerCake = document.getElementById('playerCake');
+      
+      // 深度克隆蛋糕
+      playerCake.innerHTML = '';
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'position: relative; width: 100%; height: 100%;';
+      
+      const els = getElements();
+      
+      // 复制底图
+      const baseImg = document.createElement('img');
+      baseImg.src = els.workImage.src;
+      baseImg.style.cssText = 'width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; z-index: 1;';
+      wrapper.appendChild(baseImg);
+      
+      // 复制装饰层
+      const decorClone = els.decorLayer.cloneNode(true);
+      decorClone.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none;';
+      
+      // 移除动画类，保持最终状态
+      decorClone.querySelectorAll('*').forEach(el => {
+        el.style.animation = 'none';
+        el.style.transform = el.style.transform || 'none';
+      });
+      
+      wrapper.appendChild(decorClone);
+      playerCake.appendChild(wrapper);
+      
+      // 切换页面
+      makeStage.style.display = 'none';
+      resultPage.style.display = 'block';
+      
+      // 庆祝动画
+      const celebration = document.getElementById('celebration');
+      const symbols = ['🎀', '🎉', '🎈', '🎁', '✨', '💖', '🎊', '🥳'];
+      
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+          c.style.left = Math.random() * 100 + 'vw';
+          c.style.animationDuration = (3 + Math.random() * 2) + 's';
+          c.style.fontSize = (20 + Math.random() * 20) + 'px';
+          celebration.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 40);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
