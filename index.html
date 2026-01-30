@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>高瀚宇生日派对</title>
+  <title>奶糕的生日派对蛋糕制作</title>
   <style>
     body {
       margin: 0;
@@ -11,16 +11,25 @@
       background: linear-gradient(135deg, #ffe6f0, #f8d7ff);
       font-family: "Microsoft YaHei", sans-serif;
       overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .container {
-      max-width: 90%;
-      margin: 20px auto;
+      width: 90%;
+      max-width: 520px;
       text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
     h1 {
       color: #d32f2f;
       font-size: 24px;
-      margin: 15px 0;
+      margin: 10px 0;
+      font-weight: bold;
     }
     .step-instruction {
       font-size: 18px;
@@ -31,29 +40,25 @@
     .cake-area {
       position: relative;
       width: 100%;
-      max-width: 350px;
-      height: 350px;
+      max-width: 420px;
+      height: 420px;
       margin: 20px auto;
       background: #fff9fc;
       border-radius: 50%;
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    .cake-area.drag-over {
-      background: #ffebee;
-      box-shadow: 0 0 0 3px #ff8a80;
+      overflow: visible; /* 允许装饰超出边界一点点 */
+      cursor: default;
     }
     .cake-base {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       border-radius: 50%;
     }
     .decoration {
       position: absolute;
-      font-size: 24px;
-      cursor: move;
+      font-size: 28px;
+      pointer-events: none; /* 防止遮挡点击 */
       user-select: none;
       z-index: 10;
     }
@@ -64,10 +69,10 @@
       margin: 20px 0;
     }
     .emoji-item {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       margin: 5px;
-      font-size: 24px;
+      font-size: 26px;
       cursor: grab;
       background: white;
       border-radius: 50%;
@@ -116,22 +121,16 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
     @media (max-width: 400px) {
-      .result { font-size: 28px; }
+      .cake-area { width: 360px; height: 360px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎂 高瀚宇生日派对</h1>
+    <h1>🎂 奶糕的生日派对蛋糕制作</h1>
     <div class="step-instruction" id="instruction">第一步：添加蛋糕底胚</div>
 
-    <div 
-      class="cake-area" 
-      id="cakeArea"
-      ondrop="handleDrop(event)"
-      ondragover="handleDragOver(event)"
-      ondragleave="handleDragLeave(event)"
-    >
+    <div class="cake-area" id="cakeArea">
       <!-- 蛋糕图片将由 JS 动态加载 -->
     </div>
 
@@ -158,7 +157,6 @@
   </audio>
 
   <script>
-    // 步骤定义（对应你的6张图）
     const steps = [
       { name: 'base', instruction: '第一步：添加蛋糕底胚', image: 'images/1.jpg' },
       { name: 'cream', instruction: '第二步：涂上奶油', image: 'images/2.jpg' },
@@ -175,16 +173,14 @@
     const clickSound = document.getElementById('clickSound');
     const birthdaySong = document.getElementById('birthdaySong');
 
-    // 可用 emoji 装饰
     const emojis = ['🍦', '🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁'];
 
-    // 初始化游戏
+    // 初始化
     function init() {
       updateStep();
       createEmojiPalette();
     }
 
-    // 更新当前步骤
     function updateStep() {
       if (currentStep < steps.length) {
         instruction.textContent = steps[currentStep].instruction;
@@ -195,61 +191,107 @@
       }
     }
 
-    // 创建 emoji 调色板
     function createEmojiPalette() {
       emojiPalette.innerHTML = '';
       emojis.forEach(emoji => {
         const item = document.createElement('div');
         item.className = 'emoji-item';
         item.textContent = emoji;
-        item.draggable = true;
-        item.ondragstart = (e) => {
-          e.dataTransfer.setData("text/plain", emoji);
-          e.dataTransfer.effectAllowed = "copy";
-        };
-        // 点击也生效（兼容不支持拖拽的设备）
-        item.onclick = () => addDecoration(emoji);
+        item.dataset.emoji = emoji;
+        // 绑定拖拽开始事件（兼容 touch 和 mouse）
+        item.addEventListener('mousedown', startDrag);
+        item.addEventListener('touchstart', startDrag, { passive: false });
         emojiPalette.appendChild(item);
       });
     }
 
-    // 添加装饰到蛋糕
-    function addDecoration(emoji) {
-      if (currentStep >= 5) { // 只在最后一步允许装饰
-        const decoration = document.createElement('div');
-        decoration.className = 'decoration';
-        decoration.textContent = emoji;
-        // 随机位置（避免重叠）
-        const maxX = cakeArea.offsetWidth - 30;
-        const maxY = cakeArea.offsetHeight - 30;
-        decoration.style.left = Math.max(10, Math.random() * maxX) + 'px';
-        decoration.style.top = Math.max(10, Math.random() * maxY) + 'px';
-        cakeArea.appendChild(decoration);
+    // 拖拽逻辑
+    let isDragging = false;
+    let currentEmoji = null;
+    let dragElement = null;
+
+    function startDrag(e) {
+      if (currentStep < 5) return; // 只在最后一步允许装饰
+      e.preventDefault();
+      isDragging = true;
+      currentEmoji = this.dataset.emoji;
+
+      // 创建临时拖拽元素
+      dragElement = document.createElement('div');
+      dragElement.style.position = 'fixed';
+      dragElement.style.fontSize = '28px';
+      dragElement.style.pointerEvents = 'none';
+      dragElement.style.zIndex = '1000';
+      dragElement.style.opacity = '0.8';
+      dragElement.textContent = currentEmoji;
+      document.body.appendChild(dragElement);
+
+      // 获取初始位置
+      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      dragElement.style.left = (clientX - 15) + 'px';
+      dragElement.style.top = (clientY - 15) + 'px';
+
+      // 绑定移动和结束事件
+      document.addEventListener('mousemove', dragMove);
+      document.addEventListener('mouseup', dragEnd);
+      document.addEventListener('touchmove', dragMove, { passive: false });
+      document.addEventListener('touchend', dragEnd);
+    }
+
+    function dragMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      dragElement.style.left = (clientX - 15) + 'px';
+      dragElement.style.top = (clientY - 15) + 'px';
+    }
+
+    function dragEnd(e) {
+      if (!isDragging) return;
+      isDragging = false;
+
+      // 移除临时元素
+      if (dragElement) {
+        document.body.removeChild(dragElement);
+        dragElement = null;
+      }
+
+      // 判断是否在蛋糕区域内
+      const rect = cakeArea.getBoundingClientRect();
+      const clientX = e.type === 'touchend' ? e.changedTouches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchend' ? e.changedTouches[0].clientY : e.clientY;
+
+      if (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      ) {
+        // 计算相对于 cakeArea 的位置
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        addDecorationAt(currentEmoji, x, y);
         playClick();
       }
+
+      // 清理事件
+      document.removeEventListener('mousemove', dragMove);
+      document.removeEventListener('mouseup', dragEnd);
+      document.removeEventListener('touchmove', dragMove);
+      document.removeEventListener('touchend', dragEnd);
     }
 
-    // 拖拽事件处理
-    function handleDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
-      cakeArea.classList.add('drag-over');
+    function addDecorationAt(emoji, x, y) {
+      const decoration = document.createElement('div');
+      decoration.className = 'decoration';
+      decoration.textContent = emoji;
+      decoration.style.left = (x - 15) + 'px'; // 居中对齐
+      decoration.style.top = (y - 15) + 'px';
+      cakeArea.appendChild(decoration);
     }
 
-    function handleDragLeave(e) {
-      cakeArea.classList.remove('drag-over');
-    }
-
-    function handleDrop(e) {
-      e.preventDefault();
-      cakeArea.classList.remove('drag-over');
-      const emoji = e.dataTransfer.getData("text/plain");
-      if (emoji) {
-        addDecoration(emoji);
-      }
-    }
-
-    // 控制流程
     function nextStep() {
       playClick();
       if (currentStep < steps.length) {
@@ -266,14 +308,13 @@
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
-    // 播放点击音效
     function playClick() {
       clickSound.currentTime = 0;
       clickSound.play().catch(e => console.log("Click sound failed:", e));
     }
 
-    // 启动游戏
     window.onload = init;
   </script>
 </body>
 </html>
+
