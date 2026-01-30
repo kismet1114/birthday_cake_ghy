@@ -54,7 +54,6 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       transition: transform 0.3s;
     }
-    /* 第一步特殊样式 */
     .cake-area.step-0 {
       cursor: grab;
     }
@@ -74,12 +73,10 @@
       z-index: 1;
       transform-origin: center bottom;
     }
-    /* 被压扁的状态 */
     .cake-base.squashed {
       transform: scaleY(0.85) scaleX(1.05);
       filter: brightness(0.95);
     }
-    /* 膨胀动画 */
     .cake-base.growing {
       animation: growBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
@@ -129,7 +126,6 @@
       width: 0%;
       transition: width 0.3s ease;
     }
-    /* 面粉粒子效果 */
     .flour-particle {
       position: absolute;
       pointer-events: none;
@@ -146,7 +142,6 @@
         opacity: 0;
       }
     }
-    /* 热气/蓬松感上升粒子 */
     .steam-particle {
       position: absolute;
       pointer-events: none;
@@ -165,7 +160,6 @@
         opacity: 0;
       }
     }
-    /* 完美提示 */
     .perfect-text {
       position: absolute;
       top: 30%;
@@ -186,7 +180,6 @@
       50% { transform: translate(-50%, -50%) scale(1.3) rotate(5deg); }
       100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
     }
-    /* 连击提示 */
     .combo-text {
       position: absolute;
       font-size: 24px;
@@ -314,23 +307,39 @@
       white-space: nowrap;
       text-shadow: 0 2px 4px rgba(255,255,255,0.8);
     }
+    /* 纯白色奶油样式 - 使用CSS绘制而非emoji */
     .cream-drop {
       position: absolute;
-      font-size: 20px;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #f5f5f5);
+      border-radius: 50%;
       pointer-events: none;
       z-index: 15;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      transform-origin: center;
+    }
+    .cream-drop::before {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      top: -2px;
+      left: 2px;
+      opacity: 0.8;
     }
     .candle {
       position: absolute;
-      font-size: 32px;
+      font-size: 64px;
       cursor: pointer;
       transition: transform 0.3s;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     }
     .candle.lit {
       animation: flicker 0.8s ease-in-out infinite alternate;
-      filter: drop-shadow(0 0 10px #ff6b35) drop-shadow(0 0 20px #ffd93d);
+      filter: drop-shadow(0 0 15px #ff6b35) drop-shadow(0 0 30px #ffd93d);
     }
     @keyframes flicker {
       from { transform: scale(1) rotate(-3deg); }
@@ -435,7 +444,7 @@
       { name: 'cream', instruction: '第二步：按住并拖动涂抹奶油', hint: '像真实挤奶油一样拖动鼠标', image: 'images/2.jpg', progress: 32 },
       { name: 'fruit', instruction: '第三步：点击添加水果（随机掉落）', hint: '点击任意位置掉落水果', image: 'images/3.jpg', progress: 48 },
       { name: 'candle', instruction: '第四步：点击插蜡烛（最多5根）', hint: '在蛋糕上点击插蜡烛', image: 'images/4.jpg', progress: 64 },
-      { name: 'light', instruction: '第五步：点击蜡烛点燃它们！', hint: '点击蜡烛点燃', image: 'images/5.jpg', progress: 80 },
+      { name: 'light', instruction: '第五步：点击蜡烛点燃它们！', hint: '点击蜡烛点燃', image: 'images/4.jpg', progress: 80 }, // 修改为images/4.jpg
       { name: 'party', instruction: '第六步：自由装饰蛋糕', hint: '拖拽表情到蛋糕上', image: 'images/6.jpg', progress: 100 }
     ];
 
@@ -464,7 +473,7 @@
     const nextBtn = document.getElementById('nextBtn');
     const finishBtn = document.getElementById('finishBtn');
 
-    const emojis = ['🍦', '🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🍑', '🍇', '🧁'];
+    const emojis = ['🍓', '🍒', '🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🧁'];
 
     function init() {
       updateStep();
@@ -478,7 +487,6 @@
         cakeImg.src = steps[currentStep].image;
         cakeArea.className = 'cake-area step-' + currentStep;
         
-        // 重置蓬松度显示
         if (currentStep === 0) {
           fluffMeter.classList.add('show');
           updateFluffinessMeter();
@@ -504,8 +512,7 @@
       const percentage = (fluffiness / maxFluffiness) * 100;
       fluffFill.style.width = percentage + '%';
       
-      // 根据蓬松度改变蛋糕大小
-      const scale = 0.9 + (fluffiness / maxFluffiness) * 0.2; // 0.9 -> 1.1
+      const scale = 0.9 + (fluffiness / maxFluffiness) * 0.2;
       cakeImg.style.setProperty('--current-scale', scale);
       cakeImg.style.transform = `scale(${scale})`;
       
@@ -525,7 +532,7 @@
       cakeArea.onclick = null;
 
       switch (currentStep) {
-        case 0: // 优化后的拍打膨胀效果
+        case 0:
           cakeArea.onmousedown = (e) => startPress(e);
           cakeArea.ontouchstart = (e) => { e.preventDefault(); startPress(e.touches[0]); };
           
@@ -533,7 +540,7 @@
           document.addEventListener('touchend', endPress);
           break;
           
-        case 1: // 涂奶油
+        case 1:
           cakeArea.onmousedown = (e) => {
             isDrawingCream = true;
             drawCream(e);
@@ -555,7 +562,7 @@
           cakeArea.ontouchend = () => isDrawingCream = false;
           break;
           
-        case 2: // 加水果
+        case 2:
           cakeArea.onclick = (e) => {
             const rect = cakeArea.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -564,7 +571,7 @@
           };
           break;
           
-        case 3: // 插蜡烛
+        case 3:
           cakeArea.onclick = (e) => {
             if (candleCount >= 5) {
               showFeedback("最多5根蜡烛哦！");
@@ -578,7 +585,7 @@
           };
           break;
           
-        case 4: // 点燃蜡烛
+        case 4:
           cakeArea.onclick = (e) => {
             const unlitCandles = decorationsLayer.querySelectorAll('.candle:not(.lit)');
             if (unlitCandles.length === 0) {
@@ -590,7 +597,6 @@
               return;
             }
             
-            // 查找点击位置附近的蜡烛
             const rect = cakeArea.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
@@ -599,10 +605,10 @@
             let minDist = Infinity;
             
             unlitCandles.forEach(candle => {
-              const candleX = parseFloat(candle.style.left) + 16;
-              const candleY = parseFloat(candle.style.top) + 32;
+              const candleX = parseFloat(candle.style.left) + 32;
+              const candleY = parseFloat(candle.style.top) + 64;
               const dist = Math.hypot(clickX - candleX, clickY - candleY);
-              if (dist < minDist && dist < 50) {
+              if (dist < minDist && dist < 80) {
                 minDist = dist;
                 nearestCandle = candle;
               }
@@ -628,13 +634,11 @@
       }
     }
 
-    // 第一步：按压逻辑
     function startPress(e) {
       if (fluffiness >= maxFluffiness) return;
       isPressed = true;
       cakeImg.classList.add('squashed');
       
-      // 显示连击
       combo++;
       clearTimeout(comboTimer);
       comboTimer = setTimeout(() => { combo = 0; }, 1000);
@@ -649,21 +653,17 @@
       isPressed = false;
       cakeImg.classList.remove('squashed');
       
-      // 增加蓬松度
-      const increase = 5 + Math.min(combo * 2, 10); // 连击加成
+      const increase = 5 + Math.min(combo * 2, 10);
       fluffiness = Math.min(fluffiness + increase, maxFluffiness);
       
-      // 生成面粉飞溅粒子
       createFlourExplosion();
       
-      // 生成上升蒸汽
       if (fluffiness % 20 < 10) {
         createSteam();
       }
       
       updateFluffinessMeter();
       
-      // 回弹动画
       cakeImg.classList.remove('growing');
       void cakeImg.offsetWidth;
       cakeImg.classList.add('growing');
@@ -729,7 +729,6 @@
       decorationsLayer.appendChild(perfect);
       setTimeout(() => perfect.remove(), 2000);
       
-      // 完成特效
       for (let i = 0; i < 20; i++) {
         setTimeout(() => createFlourExplosion(), i * 100);
       }
@@ -740,24 +739,27 @@
       const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
       const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
       
-      const creams = ['🥛', '🤍', '☁️', '🧁'];
+      // 创建纯白色奶油滴 - 使用CSS绘制的圆形而非emoji
       const cream = document.createElement('div');
       cream.className = 'cream-drop';
-      cream.textContent = creams[Math.floor(Math.random() * creams.length)];
       
-      const offsetX = (Math.random() - 0.5) * 10;
-      const offsetY = (Math.random() - 0.5) * 10;
+      // 随机大小变化，模拟自然的奶油挤出效果
+      const size = 8 + Math.random() * 4; // 8-12px
+      cream.style.width = size + 'px';
+      cream.style.height = size + 'px';
       
-      cream.style.left = (x + offsetX) + 'px';
-      cream.style.top = (y + offsetY) + 'px';
-      cream.style.fontSize = (16 + Math.random() * 12) + 'px';
-      cream.style.transform = `rotate(${Math.random() * 360}deg)`;
+      const offsetX = (Math.random() - 0.5) * 4;
+      const offsetY = (Math.random() - 0.5) * 4;
+      
+      cream.style.left = (x - size/2 + offsetX) + 'px';
+      cream.style.top = (y - size/2 + offsetY) + 'px';
       
       decorationsLayer.appendChild(cream);
     }
 
     function addFruit(x, y) {
-      const fruits = ['🍓', '🍒', '🍑', '🍇', '🍊', '🫐', '🥝'];
+      // 只保留指定的四种水果
+      const fruits = ['🍓', '🍒', '🫐', '🍇'];
       const fruit = document.createElement('div');
       fruit.className = 'falling-item';
       fruit.textContent = fruits[Math.floor(Math.random() * fruits.length)];
@@ -771,8 +773,8 @@
       const candle = document.createElement('div');
       candle.className = 'candle';
       candle.textContent = '🕯️';
-      candle.style.left = (x - 16) + 'px';
-      candle.style.top = (y - 32) + 'px';
+      candle.style.left = (x - 32) + 'px';
+      candle.style.top = (y - 64) + 'px';
       decorationsLayer.appendChild(candle);
     }
 
@@ -787,9 +789,9 @@
 
       feedback.animate([
         { opacity: 0, transform: 'translateX(-50%) translateY(20px) scale(0.5)' },
-        { opacity: 1, transform: 'translateX(-50%) translateY(0) scale(1.2)' },
-        { opacity: 1, transform: 'translateX(-50%) translateY(0) scale(1)' },
-        { opacity: 0, transform: 'translateX(-50%) translateY(-30px) scale(0.8)' }
+        { opacity: 1, transform: 'translateX(-50%) translateY(-10px) scale(1.2)' },
+        { opacity: 1, transform: 'translateX(-50%) translateY(-10px) scale(1)' },
+        { opacity: 0, transform: 'translateX(-50%) translateY(-40px) scale(0.8)' }
       ], { duration: 1500, easing: 'ease-out' });
 
       setTimeout(() => feedback.remove(), 1500);
@@ -929,5 +931,6 @@
   </script>
 </body>
 </html>
+
 
 
