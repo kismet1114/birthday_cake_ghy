@@ -43,16 +43,16 @@
       height: 420px;
       margin: 20px auto;
       background: #fff9fc;
-      border-radius: 50%;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      border-radius: 20px; /* 改为圆角矩形，不再裁剪 */
       overflow: visible;
       cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
     .cake-base {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      border-radius: 50%;
+      border-radius: 20px;
     }
     .decoration {
       position: absolute;
@@ -137,6 +137,9 @@
       opacity: 0;
       pointer-events: none;
       z-index: 20;
+      top: 40%;
+      left: 50%;
+      transform: translateX(-50%);
     }
     .cream-splash {
       position: absolute;
@@ -170,6 +173,7 @@
   </style>
 </head>
 <body>
+  <!-- 制作阶段 -->
   <div class="container" id="makeStage">
     <h1>🎂 奶糕的生日派对蛋糕制作</h1>
     <div class="step-instruction" id="instruction">第一步：添加蛋糕底胚</div>
@@ -182,6 +186,7 @@
     <button class="btn" onclick="finish()">完成派对！</button>
   </div>
 
+  <!-- 最终展示阶段 -->
   <div class="result-page" id="resultPage">
     <h1>🎂 蛋糕完成啦！</h1>
     <img src="images/6.jpg" alt="完成的蛋糕" class="final-cake">
@@ -192,6 +197,7 @@
     </div>
   </div>
 
+  <!-- 庆祝动画容器 -->
   <div class="celebration" id="celebration"></div>
 
   <!-- 音频 -->
@@ -237,7 +243,7 @@
       } else {
         instruction.textContent = '派对开始！自由装饰吧～';
         cakeArea.innerHTML = `<img src="images/6.jpg" class="cake-base">`;
-        bindStepInteraction(); // 绑定拖拽
+        bindStepInteraction();
       }
     }
 
@@ -285,7 +291,6 @@
       feedback.style.transform = 'translateX(-50%)';
       cakeArea.appendChild(feedback);
 
-      // 动画
       feedback.animate([
         { opacity: 0, transform: 'translateX(-50%) translateY(20px)' },
         { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
@@ -365,7 +370,7 @@
       }
     }
 
-    // 拖拽逻辑（保持不变）
+    // 拖拽逻辑
     let isDragging = false;
     let dragElement = null;
 
