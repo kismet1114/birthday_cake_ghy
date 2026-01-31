@@ -39,7 +39,6 @@
       transition: all 0.5s;
     }
 
-    /* 烛光环境光效果容器 */
     .main-container.candle-lit {
       box-shadow: 0 10px 60px rgba(255, 150, 50, 0.3), inset 0 0 100px rgba(255, 200, 100, 0.1);
       border: 2px solid rgba(255, 200, 100, 0.3);
@@ -99,7 +98,6 @@
       transition: all 0.5s;
     }
 
-    /* 工作区烛光效果 */
     .work-panel.candle-glow {
       box-shadow: 0 0 50px rgba(255, 180, 80, 0.4), inset 0 0 30px rgba(255, 220, 150, 0.2);
       border-color: rgba(255, 200, 100, 0.5);
@@ -190,7 +188,18 @@
       transition: all 0.5s;
     }
 
-    /* 蛋糕区域烛光溢出效果 */
+    /* 拍打面团时的自定义光标 - 使用8.png擀面杖，热点在尖端(16,16) */
+    .cake-workspace.fluff-cursor {
+      cursor: url('images/8.png') 16 16, grab;
+    }
+
+    /* 确保图片cursor在移动端也生效 */
+    @media (pointer: coarse) {
+      .cake-workspace.fluff-cursor {
+        cursor: grab;
+      }
+    }
+
     .cake-workspace.candle-ambiance {
       box-shadow: 0 0 60px rgba(255, 150, 50, 0.5), inset 0 0 40px rgba(255, 200, 100, 0.3);
       animation: cakeGlow 1.5s ease-in-out infinite alternate;
@@ -224,7 +233,6 @@
       z-index: 10;
     }
 
-    /* 奶油 - 带3D阴影效果 */
     .cream-flower {
       position: absolute;
       width: 96px;
@@ -236,7 +244,6 @@
       transition: filter 0.3s;
     }
 
-    /* 后挤的奶油阴影更深，实现堆叠感 */
     .cream-flower:nth-child(5n+1) { filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.1)) brightness(0.98); }
     .cream-flower:nth-child(5n+2) { filter: drop-shadow(2px 3px 5px rgba(0,0,0,0.12)) brightness(0.96); }
     .cream-flower:nth-child(5n+3) { filter: drop-shadow(3px 4px 6px rgba(0,0,0,0.15)) brightness(0.94); }
@@ -481,7 +488,6 @@
       opacity: 1;
     }
 
-    /* 蓬松度浮动文字 */
     .fluff-popup {
       position: absolute;
       color: #e91e63;
@@ -500,7 +506,6 @@
       100% { transform: translateY(-60px) scale(1); opacity: 0; }
     }
 
-    /* 保存提示 */
     .save-indicator {
       position: fixed;
       top: 20px;
@@ -516,7 +521,6 @@
     }
     .save-indicator.show { opacity: 1; }
 
-    /* 悬停预览 */
     .hover-preview {
       position: fixed;
       pointer-events: none;
@@ -533,7 +537,6 @@
       object-fit: contain;
     }
 
-    /* 继续制作按钮 */
     .continue-btn {
       position: absolute;
       top: 20px;
@@ -582,7 +585,8 @@
         <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
 
         <div class="cake-workspace" id="cakeArea">
-          <img src="images/1.jpg" class="cake-base-img" id="workImage" alt="工作蛋糕">
+          <!-- 底图统一换成7.jpg -->
+          <img src="images/7.jpg" class="cake-base-img" id="workImage" alt="工作蛋糕">
           <div class="decorations-layer" id="decorationsLayer"></div>
         </div>
 
@@ -625,7 +629,6 @@
   <div class="hover-preview" id="hoverPreview"></div>
 
   <script>
-    // 音频资源管理器 - 支持音调变化
     const AudioManager = {
       cream: new Audio('music/cream.mp3'),
       bg: new Audio('music/song.mp3'),
@@ -633,7 +636,6 @@
       pitch: 1.0,
 
       playCream() {
-        // 音调变化：根据速度在0.8-1.2之间变化
         this.pitch = 0.8 + Math.random() * 0.4;
         const audio = this.cream.cloneNode();
         audio.playbackRate = this.pitch;
@@ -642,33 +644,31 @@
       },
 
       playFluff() {
-        // 打击乐效果，随机音调
         const pitch = 0.9 + Math.random() * 0.2;
         const audio = this.fluff.cloneNode();
         audio.playbackRate = pitch;
         audio.volume = 0.6;
         audio.play().catch(() => {
-          // 降级使用cream
           this.playCream();
         });
       },
 
       playFruit() {
-        // 水果放置音效 - 软着陆声
         const audio = this.cream.cloneNode();
-        audio.playbackRate = 1.5; // 高音调
+        audio.playbackRate = 1.5;
         audio.volume = 0.3;
         audio.play().catch(() => {});
       }
     };
 
+    // 步骤配置 - 所有work底图都使用7.jpg
     const steps = [
-      { guide: 'images/1.jpg', work: 'images/1.jpg', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
-      { guide: 'images/2.jpg', work: 'images/2.jpg', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
-      { guide: 'images/3.jpg', work: 'images/2.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true },
-      { guide: 'images/4.jpg', work: 'images/2.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
-      { guide: 'images/5.jpg', work: 'images/2.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
-      { guide: 'images/6.jpg', work: 'images/2.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
+      { guide: 'images/1.jpg', work: 'images/7.jpg', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
+      { guide: 'images/2.jpg', work: 'images/7.jpg', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
+      { guide: 'images/3.jpg', work: 'images/7.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true },
+      { guide: 'images/4.jpg', work: 'images/7.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
+      { guide: 'images/5.jpg', work: 'images/7.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
+      { guide: 'images/6.jpg', work: 'images/7.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
     ];
 
     let currentStep = 0;
@@ -676,7 +676,7 @@
     let candleCount = 0;
     let isDrawing = false;
     let decorations = [];
-    let hasLitCandle = false; // 是否点燃了蜡烛
+    let hasLitCandle = false;
 
     const emojis = ['🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🐱', '🎀'];
     const fruits = ['images/blue.png', 'images/lemon.png', 'images/strawberry.png'];
@@ -702,7 +702,6 @@
       setTimeout(() => indicator.classList.remove('show'), 2000);
     }
 
-    // 保存进度到localStorage
     function saveProgress() {
       const data = {
         currentStep,
@@ -716,7 +715,6 @@
       showSaveIndicator();
     }
 
-    // 加载进度
     function loadProgress() {
       const saved = localStorage.getItem('cakeProgress');
       if (saved) {
@@ -728,7 +726,6 @@
 
         if (data.html) {
           document.getElementById('decorationsLayer').innerHTML = data.html;
-          // 重新绑定事件
           rebindDecorations();
         }
 
@@ -743,7 +740,6 @@
       }
     }
 
-    // 重新绑定装饰物的事件
     function rebindDecorations() {
       decorations = [];
       const decorEls = document.getElementById('decorationsLayer').children;
@@ -757,7 +753,6 @@
       }
     }
 
-    // 检查是否有保存的进度
     function checkSavedProgress() {
       const saved = localStorage.getItem('cakeProgress');
       if (saved) {
@@ -765,14 +760,12 @@
       }
     }
 
-    // 应用烛光环境效果
     function applyCandleAmbiance() {
       document.getElementById('makeStage').classList.add('candle-lit');
       document.getElementById('workPanel').classList.add('candle-glow');
       document.getElementById('cakeArea').classList.add('candle-ambiance');
     }
 
-    // 移除烛光效果
     function removeCandleAmbiance() {
       document.getElementById('makeStage').classList.remove('candle-lit');
       document.getElementById('workPanel').classList.remove('candle-glow');
@@ -822,7 +815,6 @@
         document.getElementById('emojiPalette').style.display = 'none';
       }
 
-      // 重要：切换步骤时隐藏烛光效果（除非当前是点燃蜡烛的步骤）
       if (currentStep !== 4 && !hasLitCandle) {
         removeCandleAmbiance();
       }
@@ -834,6 +826,7 @@
       const decorLayer = document.getElementById('decorationsLayer');
       const step = steps[currentStep];
 
+      // 清除旧事件
       cakeArea.onmousedown = null;
       cakeArea.onmousemove = null;
       cakeArea.onmouseup = null;
@@ -843,16 +836,21 @@
       cakeArea.ontouchmove = null;
       cakeArea.ontouchend = null;
 
+      // 清除自定义光标类
+      cakeArea.classList.remove('fluff-cursor');
+      cakeArea.style.cursor = 'default';
+
       if (step.action === 'fluff') {
         let pressing = false;
         let interval;
 
-        workImage.style.cursor = 'grab';
+        // 设置擀面杖光标
+        cakeArea.classList.add('fluff-cursor');
 
         const startFluff = (e) => {
           e.preventDefault();
           pressing = true;
-          workImage.style.transform = 'scale(0.9, 1.1)';
+          workImage.style.transform = 'scale(0.9, 1.1)'; // 拍打时的挤压效果
 
           AudioManager.playFluff();
 
@@ -911,22 +909,19 @@
           cream.style.left = (x - 48) + 'px';
           cream.style.top = (y - 48) + 'px';
 
-          // 根据涂抹速度调整大小和旋转，模拟真实奶油挤出感
           const speed = Math.min(10, Math.abs(x - lastX) + Math.abs(y - lastY));
-          const scale = 0.9 + Math.random() * 0.2 - (speed * 0.01); // 速度快时稍微压扁
-          const rotation = (Math.random() - 0.5) * 30 * (speed / 5); // 速度快时旋转更大
+          const scale = 0.9 + Math.random() * 0.2 - (speed * 0.01);
+          const rotation = (Math.random() - 0.5) * 30 * (speed / 5);
           cream.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
 
           decorLayer.appendChild(cream);
           trackDecoration(cream);
 
-          // 自动保存（每10个奶油保存一次）
           const creams = decorLayer.querySelectorAll('.cream-flower');
           if (creams.length % 10 === 0) {
             saveProgress();
           }
 
-          // 上限提高
           if (creams.length > 200) {
             creams[0].remove();
           }
@@ -1089,6 +1084,8 @@
       }
 
       else if (step.action === 'light') {
+        cakeArea.style.cursor = 'pointer';
+
         cakeArea.onclick = (e) => {
           const rect = cakeArea.getBoundingClientRect();
           const clickX = e.clientX - rect.left;
@@ -1109,7 +1106,6 @@
                 candle.classList.add('lit');
                 litNew = true;
 
-                // 点燃音效
                 AudioManager.playFluff();
 
                 for (let i = 0; i < 6; i++) {
@@ -1177,7 +1173,6 @@
         item.className = 'emoji-item';
         item.textContent = emoji;
 
-        // 悬停预览
         item.onmouseenter = (e) => showHoverPreview(e, emoji, 'emoji');
         item.onmouseleave = hideHoverPreview;
 
@@ -1196,7 +1191,6 @@
         img.style.objectFit = 'contain';
         item.appendChild(img);
 
-        // 悬停预览
         item.onmouseenter = (e) => showHoverPreview(e, imgData.src, 'image');
         item.onmouseleave = hideHoverPreview;
 
@@ -1205,7 +1199,6 @@
       });
     }
 
-    // 悬停预览功能
     function showHoverPreview(e, content, type) {
       const preview = document.getElementById('hoverPreview');
       if (type === 'emoji') {
@@ -1223,7 +1216,6 @@
       document.getElementById('hoverPreview').style.display = 'none';
     }
 
-    // 鼠标移动时更新预览位置
     document.addEventListener('mousemove', (e) => {
       const preview = document.getElementById('hoverPreview');
       if (preview.style.display === 'block') {
@@ -1263,7 +1255,7 @@
           const cakeRect = document.getElementById('cakeArea').getBoundingClientRect();
 
           if (cx >= cakeRect.left && cx <= cakeRect.right && cy >= cakeRect.top && cy <= cakeRect.bottom) {
-            AudioManager.playFruit(); // 放置装饰的音效
+            AudioManager.playFruit();
 
             if (type === 'emoji') {
               const decor = document.createElement('div');
@@ -1352,7 +1344,6 @@
       document.getElementById('makeStage').style.display = 'none';
       document.getElementById('resultPage').style.display = 'block';
 
-      // 清除保存的进度（已完成）
       localStorage.removeItem('cakeProgress');
 
       try {
