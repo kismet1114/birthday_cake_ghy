@@ -188,12 +188,12 @@
       transition: all 0.5s;
     }
 
-    /* 拍打面团时的自定义光标 - 使用8.png擀面杖，热点在尖端(16,16) */
+    /* 拍打环节自定义光标 - 8.png 擀面杖 */
     .cake-workspace.fluff-cursor {
       cursor: url('images/8.png') 16 16, grab;
     }
 
-    /* 确保图片cursor在移动端也生效 */
+    /* 如果图片加载失败，使用兜底光标 */
     @media (pointer: coarse) {
       .cake-workspace.fluff-cursor {
         cursor: grab;
@@ -233,6 +233,7 @@
       z-index: 10;
     }
 
+    /* 奶油 - 简化版，删除阴影层次效果 */
     .cream-flower {
       position: absolute;
       width: 96px;
@@ -240,15 +241,7 @@
       pointer-events: none;
       z-index: 15;
       animation: creamGrow 0.3s ease-out forwards;
-      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));
-      transition: filter 0.3s;
     }
-
-    .cream-flower:nth-child(5n+1) { filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.1)) brightness(0.98); }
-    .cream-flower:nth-child(5n+2) { filter: drop-shadow(2px 3px 5px rgba(0,0,0,0.12)) brightness(0.96); }
-    .cream-flower:nth-child(5n+3) { filter: drop-shadow(3px 4px 6px rgba(0,0,0,0.15)) brightness(0.94); }
-    .cream-flower:nth-child(5n+4) { filter: drop-shadow(4px 5px 7px rgba(0,0,0,0.18)) brightness(0.92); }
-    .cream-flower:nth-last-child(-n+3) { filter: drop-shadow(5px 6px 8px rgba(0,0,0,0.2)) brightness(1); z-index: 16; }
 
     .cream-flower img {
       width: 100%;
@@ -584,8 +577,8 @@
         <div class="instruction-text" id="instruction">第一步：按住蛋糕拍打，让面团膨胀！</div>
         <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
 
-        <div class="cake-workspace" id="cakeArea">
-          <!-- 底图统一换成7.jpg -->
+        <div class="cake-workspace fluff-cursor" id="cakeArea">
+          <!-- 修正：7.png 而不是 7.jpg -->
           <img src="images/7.png" class="cake-base-img" id="workImage" alt="工作蛋糕">
           <div class="decorations-layer" id="decorationsLayer"></div>
         </div>
@@ -629,39 +622,61 @@
   <div class="hover-preview" id="hoverPreview"></div>
 
   <script>
+    // 音频管理 - 完善错误处理
     const AudioManager = {
-      cream: new Audio('music/cream.mp3'),
-      bg: new Audio('music/song.mp3'),
-      fluff: new Audio('music/fluff.mp3'),
-      pitch: 1.0,
+      cream: null,
+      bg: null,
+      fluff: null,
+      initialized: false,
+
+      init() {
+        try {
+          this.cream = new Audio('music/cream.mp3');
+          this.bg = new Audio('music/song.mp3');
+          this.fluff = new Audio('music/fluff.mp3');
+          this.initialized = true;
+        } catch(e) {
+          console.log('音频初始化失败');
+        }
+      },
 
       playCream() {
-        this.pitch = 0.8 + Math.random() * 0.4;
-        const audio = this.cream.cloneNode();
-        audio.playbackRate = this.pitch;
-        audio.volume = 0.5;
-        audio.play().catch(() => {});
+        if (!this.initialized || !this.cream) return;
+        try {
+          const pitch = 0.8 + Math.random() * 0.4;
+          const audio = this.cream.cloneNode();
+          audio.playbackRate = pitch;
+          audio.volume = 0.5;
+          audio.play().catch(() => {});
+        } catch(e) {}
       },
 
       playFluff() {
-        const pitch = 0.9 + Math.random() * 0.2;
-        const audio = this.fluff.cloneNode();
-        audio.playbackRate = pitch;
-        audio.volume = 0.6;
-        audio.play().catch(() => {
-          this.playCream();
-        });
+        if (!this.initialized) return;
+        try {
+          const pitch = 0.9 + Math.random() * 0.2;
+          const audio = (this.fluff || this.cream).cloneNode();
+          audio.playbackRate = pitch;
+          audio.volume = 0.6;
+          audio.play().catch(() => {});
+        } catch(e) {}
       },
 
       playFruit() {
-        const audio = this.cream.cloneNode();
-        audio.playbackRate = 1.5;
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
+        if (!this.initialized || !this.cream) return;
+        try {
+          const audio = this.cream.cloneNode();
+          audio.playbackRate = 1.5;
+          audio.volume = 0.3;
+          audio.play().catch(() => {});
+        } catch(e) {}
       }
     };
 
-    // 步骤配置 - 所有work底图都使用7.jpg
+    // 初始化音频
+    AudioManager.init();
+
+    // 步骤配置 - 修正：所有work底图使用7.png
     const steps = [
       { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
       { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
@@ -826,7 +841,6 @@
       const decorLayer = document.getElementById('decorationsLayer');
       const step = steps[currentStep];
 
-      // 清除旧事件
       cakeArea.onmousedown = null;
       cakeArea.onmousemove = null;
       cakeArea.onmouseup = null;
@@ -836,7 +850,7 @@
       cakeArea.ontouchmove = null;
       cakeArea.ontouchend = null;
 
-      // 清除自定义光标类
+      // 关键：清除之前的光标类
       cakeArea.classList.remove('fluff-cursor');
       cakeArea.style.cursor = 'default';
 
@@ -844,13 +858,13 @@
         let pressing = false;
         let interval;
 
-        // 设置擀面杖光标
+        // 关键：添加擀面杖光标类
         cakeArea.classList.add('fluff-cursor');
 
         const startFluff = (e) => {
           e.preventDefault();
           pressing = true;
-          workImage.style.transform = 'scale(0.9, 1.1)'; // 拍打时的挤压效果
+          workImage.style.transform = 'scale(0.95, 1.05)';
 
           AudioManager.playFluff();
 
@@ -1377,4 +1391,5 @@
   </script>
 </body>
 </html>
+
 
