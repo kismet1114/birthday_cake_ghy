@@ -192,7 +192,7 @@
       z-index: 10;
     }
 
-    /* 奶油 - 大小调整为96px (原24px的4倍) */
+    /* 奶油 - 大小96px，注意z-index要确保新的在上面 */
     .cream-flower {
       position: absolute;
       width: 96px;
@@ -213,7 +213,6 @@
       100% { transform: scale(1) rotate(360deg); opacity: 1; }
     }
 
-    /* 水果 - 基础30px，通过JS动态调整特定水果为60px */
     .static-fruit {
       position: absolute;
       width: 30px;
@@ -436,17 +435,32 @@
       opacity: 1;
     }
 
-    .audio-control {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(255,255,255,0.9);
-      padding: 10px;
-      border-radius: 50%;
-      cursor: pointer;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    /* 蓬松度浮动文字动画 */
+    .fluff-popup {
+      position: absolute;
+      color: #e91e63;
+      font-weight: bold;
       font-size: 20px;
+      pointer-events: none;
+      z-index: 100;
+      animation: floatUp 1s ease-out forwards;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+    }
+
+    @keyframes floatUp {
+      0% { 
+        transform: translateY(0) scale(0.5); 
+        opacity: 0; 
+      }
+      20% { 
+        transform: translateY(-20px) scale(1.2); 
+        opacity: 1; 
+      }
+      100% { 
+        transform: translateY(-60px) scale(1); 
+        opacity: 0; 
+      }
     }
   </style>
 <base target="_blank">
@@ -473,7 +487,7 @@
 
       <div class="work-panel" style="position: relative;">
         <div class="work-label">👩‍🍳 你的工作台</div>
-        <div class="instruction-text" id="instruction">第二步：涂抹奶油（按住拖动涂抹）</div>
+        <div class="instruction-text" id="instruction">第一步：按住蛋糕拍打，让面团膨胀！</div>
         <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
 
         <div class="cake-workspace" id="cakeArea">
@@ -518,14 +532,16 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // 音频资源
+    // 音频资源 - 添加拍打音效
     const creamSound = new Audio('music/cream.mp3');
     const bgMusic = new Audio('music/song.mp3');
+    const fluffSound = new Audio('music/fluff.mp3'); // 拍打音效，如果没有会自动忽略错误
+
     creamSound.volume = 0.5;
     bgMusic.volume = 0.4;
+    fluffSound.volume = 0.6;
     bgMusic.loop = true;
 
-    // 步骤配置 - 从第二步奶油开始
     const steps = [
       { guide: 'images/1.jpg', work: 'images/1.jpg', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
       { guide: 'images/2.jpg', work: 'images/2.jpg', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
@@ -535,7 +551,7 @@
       { guide: 'images/6.jpg', work: 'images/2.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
     ];
 
-    let currentStep = 0; // 直接从第一步开始，但我们可以测试时手动设置到1
+    let currentStep = 0;
     let fluffiness = 0;
     let candleCount = 0;
     let isDrawing = false;
@@ -557,6 +573,17 @@
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // 显示蓬松度+1浮动文字
+    function showFluffPopup(x, y) {
+      const popup = document.createElement('div');
+      popup.className = 'fluff-popup';
+      popup.textContent = '蓬松度 +1';
+      popup.style.left = x + 'px';
+      popup.style.top = y + 'px';
+      document.getElementById('cakeArea').appendChild(popup);
+      setTimeout(() => popup.remove(), 1000);
     }
 
     function updateStep() {
@@ -593,11 +620,6 @@
       }
     }
 
-    // 全局变量用于奶油涂抹
-    let lastCreamX = 0;
-    let lastCreamY = 0;
-    let creamAnimationId = null;
-
     function setupStepInteraction() {
       const cakeArea = document.getElementById('cakeArea');
       const workImage = document.getElementById('workImage');
@@ -614,26 +636,53 @@
       cakeArea.ontouchmove = null;
       cakeArea.ontouchend = null;
 
-      // 清除可能的动画帧
-      if (creamAnimationId) {
-        cancelAnimationFrame(creamAnimationId);
-        creamAnimationId = null;
-      }
-
       if (step.action === 'fluff') {
         let pressing = false;
         let interval;
 
         workImage.style.cursor = 'grab';
 
-        cakeArea.onmousedown = cakeArea.ontouchstart = (e) => {
+        const startFluff = (e) => {
           e.preventDefault();
           pressing = true;
           workImage.style.transform = 'scale(0.9, 1.1)';
 
+          // 播放拍打音效
+          try {
+            fluffSound.currentTime = 0;
+            fluffSound.play().catch(e => {
+              // 如果没有fluff.mp3，就用cream.mp3代替
+              creamSound.currentTime = 0;
+              creamSound.play().catch(() => {});
+            });
+          } catch(e) {}
+
+          // 获取点击位置显示浮动文字
+          const rect = cakeArea.getBoundingClientRect();
+          const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+          const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+          showFluffPopup(x - 40, y - 40); // 居中偏移
+
           interval = setInterval(() => {
-            fluffiness = Math.min(fluffiness + 5, 100);
-            updateProgressDisplay();
+            if (fluffiness < 100) {
+              fluffiness = Math.min(fluffiness + 5, 100);
+              updateProgressDisplay();
+
+              // 每隔一段时间显示浮动文字和播放音效
+              if (fluffiness % 10 === 0 && fluffiness < 100) {
+                showFluffPopup(x - 40 + (Math.random() * 20 - 10), y - 40 + (Math.random() * 20 - 10));
+                try {
+                  fluffSound.currentTime = 0;
+                  fluffSound.play().catch(() => {
+                    creamSound.currentTime = 0;
+                    creamSound.play().catch(() => {});
+                  });
+                } catch(e) {}
+              }
+            }
+
             if (fluffiness >= 100) {
               clearInterval(interval);
               showToast('蛋糕已经很蓬松了！');
@@ -642,18 +691,28 @@
           }, 100);
         };
 
-        const endPress = () => {
+        const endFluff = () => {
           pressing = false;
           clearInterval(interval);
           workImage.style.transform = 'scale(1)';
         };
 
-        cakeArea.onmouseup = cakeArea.onmouseleave = cakeArea.ontouchend = endPress;
+        cakeArea.onmousedown = startFluff;
+        cakeArea.ontouchstart = startFluff;
+        cakeArea.onmouseup = endFluff;
+        cakeArea.onmouseleave = endFluff;
+        cakeArea.ontouchend = endFluff;
       }
 
       else if (step.action === 'cream') {
         cakeArea.style.cursor = 'crosshair';
-        isDrawing = false;
+
+        // 删除之前的所有奶油（重置时）
+        // 注意：不在每次移动时删除，让用户可以无限涂抹
+
+        let lastX = 0;
+        let lastY = 0;
+        let isPressed = false;
 
         const addCreamAt = (x, y) => {
           // 播放音效
@@ -672,85 +731,101 @@
           decorLayer.appendChild(cream);
           trackDecoration(cream);
 
-          // 限制数量
+          // 不再自动删除旧的奶油，让用户尽情涂抹
+          // 如果性能有问题，可以设置一个很高的上限如200
           const creams = decorLayer.querySelectorAll('.cream-flower');
-          if (creams.length > 40) creams[0].remove();
-        };
-
-        // 鼠标事件
-        cakeArea.onmousedown = (e) => {
-          e.preventDefault();
-          isDrawing = true;
-          const rect = cakeArea.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          lastCreamX = x;
-          lastCreamY = y;
-          addCreamAt(x, y);
-        };
-
-        cakeArea.onmousemove = (e) => {
-          if (!isDrawing) return;
-          e.preventDefault();
-          const rect = cakeArea.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          // 计算距离，使用较小的阈值(15px)保证连续性
-          const dist = Math.hypot(x - lastCreamX, y - lastCreamY);
-          if (dist > 15) {
-            // 在两点之间插值，确保连续
-            const steps = Math.floor(dist / 15);
-            for (let i = 1; i <= steps; i++) {
-              const t = i / steps;
-              const ix = lastCreamX + (x - lastCreamX) * t;
-              const iy = lastCreamY + (y - lastCreamY) * t;
-              addCreamAt(ix, iy);
-            }
-            lastCreamX = x;
-            lastCreamY = y;
+          if (creams.length > 200) {
+            creams[0].remove();
           }
         };
 
+        // 鼠标按下
+        cakeArea.onmousedown = (e) => {
+          e.preventDefault();
+          isPressed = true;
+          const rect = cakeArea.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          lastX = x;
+          lastY = y;
+          addCreamAt(x, y);
+        };
+
+        // 鼠标移动 - 关键优化：确保每15px就生成一个，使用插值
+        cakeArea.onmousemove = (e) => {
+          if (!isPressed) return;
+          e.preventDefault();
+
+          const rect = cakeArea.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          // 计算距离
+          const dx = x - lastX;
+          const dy = y - lastY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          // 如果移动距离超过10px，就在路径上填充奶油
+          if (distance > 10) {
+            // 计算需要插入多少个中间点
+            const steps = Math.ceil(distance / 10);
+
+            for (let i = 0; i < steps; i++) {
+              const t = (i + 1) / steps;
+              const ix = lastX + dx * t;
+              const iy = lastY + dy * t;
+              addCreamAt(ix, iy);
+            }
+
+            lastX = x;
+            lastY = y;
+          }
+        };
+
+        // 鼠标释放
         const stopDrawing = () => {
-          isDrawing = false;
+          isPressed = false;
         };
 
         cakeArea.onmouseup = stopDrawing;
         cakeArea.onmouseleave = stopDrawing;
 
-        // 触摸事件 - 使用同样的逻辑
+        // 触摸事件处理
         cakeArea.ontouchstart = (e) => {
           e.preventDefault();
-          isDrawing = true;
+          isPressed = true;
           const touch = e.touches[0];
           const rect = cakeArea.getBoundingClientRect();
           const x = touch.clientX - rect.left;
           const y = touch.clientY - rect.top;
-          lastCreamX = x;
-          lastCreamY = y;
+          lastX = x;
+          lastY = y;
           addCreamAt(x, y);
         };
 
         cakeArea.ontouchmove = (e) => {
           e.preventDefault();
-          if (!isDrawing) return;
+          if (!isPressed) return;
+
           const touch = e.touches[0];
           const rect = cakeArea.getBoundingClientRect();
           const x = touch.clientX - rect.left;
           const y = touch.clientY - rect.top;
 
-          const dist = Math.hypot(x - lastCreamX, y - lastCreamY);
-          if (dist > 15) {
-            const steps = Math.floor(dist / 15);
-            for (let i = 1; i <= steps; i++) {
-              const t = i / steps;
-              const ix = lastCreamX + (x - lastCreamX) * t;
-              const iy = lastCreamY + (y - lastCreamY) * t;
+          const dx = x - lastX;
+          const dy = y - lastY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance > 10) {
+            const steps = Math.ceil(distance / 10);
+            for (let i = 0; i < steps; i++) {
+              const t = (i + 1) / steps;
+              const ix = lastX + dx * t;
+              const iy = lastY + dy * t;
               addCreamAt(ix, iy);
             }
-            lastCreamX = x;
-            lastCreamY = y;
+            lastX = x;
+            lastY = y;
           }
         };
 
@@ -1033,9 +1108,8 @@
       }
     }
 
-    // 初始化
     updateStep();
   </script>
 </body>
-
 </html>
+
