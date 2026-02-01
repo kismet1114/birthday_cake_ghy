@@ -233,7 +233,7 @@
       z-index: 10;
     }
 
-    /* 奶油 - 简化版，删除阴影层次效果 */
+    /* 奶油 - 简化版 */
     .cream-flower {
       position: absolute;
       width: 96px;
@@ -254,6 +254,7 @@
       100% { transform: scale(1) rotate(360deg); opacity: 1; }
     }
 
+    /* 水果样式 - 修改大小 */
     .static-fruit {
       position: absolute;
       width: 30px;
@@ -263,9 +264,16 @@
       animation: fruitDrop 0.5s ease-out forwards;
     }
 
-    .static-fruit.large {
-      width: 60px;
-      height: 60px;
+    /* strawberry - 1.3倍 (39px) */
+    .static-fruit.strawberry {
+      width: 39px;
+      height: 39px;
+    }
+
+    /* blue和lemon - 0.8倍 (48px)，原来是60px，现在是48px */
+    .static-fruit.medium {
+      width: 48px;
+      height: 48px;
     }
 
     .static-fruit img {
@@ -280,14 +288,22 @@
       100% { transform: scale(1) translateY(0); }
     }
 
+    /* 蜡烛样式 - 使用图片替换emoji */
     .candle {
       position: absolute;
-      font-size: 48px;
+      width: 48px;
+      height: 48px;
       cursor: pointer;
       z-index: 20;
       transition: transform 0.2s;
       animation: candleInsert 0.3s ease-out;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .candle img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     @keyframes candleInsert {
@@ -578,7 +594,6 @@
         <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
 
         <div class="cake-workspace fluff-cursor" id="cakeArea">
-          <!-- 修正：7.png 而不是 7.jpg -->
           <img src="images/7.png" class="cake-base-img" id="workImage" alt="工作蛋糕">
           <div class="decorations-layer" id="decorationsLayer"></div>
         </div>
@@ -622,7 +637,7 @@
   <div class="hover-preview" id="hoverPreview"></div>
 
   <script>
-    // 音频管理 - 完善错误处理
+    // 音频管理 - 使用new.mp3作为庆祝音乐
     const AudioManager = {
       cream: null,
       bg: null,
@@ -632,7 +647,7 @@
       init() {
         try {
           this.cream = new Audio('music/cream.mp3');
-          this.bg = new Audio('music/song.mp3');
+          this.bg = new Audio('music/new.mp3');  // 修改：使用new.mp3作为庆祝音乐
           this.fluff = new Audio('music/fluff.mp3');
           this.initialized = true;
         } catch(e) {
@@ -673,17 +688,16 @@
       }
     };
 
-    // 初始化音频
     AudioManager.init();
 
-    // 步骤配置 - 修正：所有work底图使用7.png
+    // 步骤配置 - 修改：第三步及之后使用3.jpg作为底图
     const steps = [
       { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
       { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
-      { guide: 'images/3.jpg', work: 'images/7.png', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true },
-      { guide: 'images/4.jpg', work: 'images/7.png', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
-      { guide: 'images/5.jpg', work: 'images/7.png', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
-      { guide: 'images/6.jpg', work: 'images/7.png', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
+      { guide: 'images/3.jpg', work: 'images/3.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true, clearCream: true },
+      { guide: 'images/4.jpg', work: 'images/3.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
+      { guide: 'images/5.jpg', work: 'images/3.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
+      { guide: 'images/6.jpg', work: 'images/3.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
     ];
 
     let currentStep = 0;
@@ -695,7 +709,9 @@
 
     const emojis = ['🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🐱', '🎀'];
     const fruits = ['images/blue.png', 'images/lemon.png', 'images/strawberry.png'];
-    const largeFruits = ['images/blue.png', 'images/lemon.png'];
+    // 修改：blue和lemon现在是0.8倍（48px），strawberry是1.3倍（39px）
+    const mediumFruits = ['images/blue.png', 'images/lemon.png']; // 48px
+    const largeFruits = ['images/strawberry.png']; // 39px（相对原来的30px是1.3倍）
 
     const extraImages = [
       { src: 'images/fox2.png', name: 'fox2' },
@@ -833,6 +849,20 @@
       if (currentStep !== 4 && !hasLitCandle) {
         removeCandleAmbiance();
       }
+
+      // 处理第三步清除奶油痕迹
+      if (step.clearCream) {
+        clearCreamTraces();
+      }
+    }
+
+    // 清除奶油痕迹
+    function clearCreamTraces() {
+      const decorLayer = document.getElementById('decorationsLayer');
+      const creams = decorLayer.querySelectorAll('.cream-flower');
+      creams.forEach(cream => cream.remove());
+      // 同时从decorations数组中移除
+      decorations = decorations.filter(d => d.step !== 1);
     }
 
     function setupStepInteraction() {
@@ -850,7 +880,7 @@
       cakeArea.ontouchmove = null;
       cakeArea.ontouchend = null;
 
-      // 关键：清除之前的光标类
+      // 关键：先移除fluff-cursor类
       cakeArea.classList.remove('fluff-cursor');
       cakeArea.style.cursor = 'default';
 
@@ -858,7 +888,7 @@
         let pressing = false;
         let interval;
 
-        // 关键：添加擀面杖光标类
+        // 关键：重新添加fluff-cursor类
         cakeArea.classList.add('fluff-cursor');
 
         const startFluff = (e) => {
@@ -1044,12 +1074,16 @@
           const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
           fruit.innerHTML = `<img src="${randomFruit}" alt="fruit">`;
 
-          const isLarge = largeFruits.includes(randomFruit);
-          if (isLarge) {
-            fruit.classList.add('large');
+          // 修改：根据水果类型设置不同大小
+          let offset = 15; // 默认30px/2
+          if (randomFruit.includes('strawberry')) {
+            fruit.classList.add('strawberry'); // 39px
+            offset = 19.5;
+          } else {
+            fruit.classList.add('medium'); // blue和lemon 48px
+            offset = 24;
           }
 
-          const offset = isLarge ? 30 : 15;
           fruit.style.left = (e.clientX - rect.left - offset) + 'px';
           fruit.style.top = (e.clientY - rect.top - offset) + 'px';
 
@@ -1080,7 +1114,8 @@
           const rect = cakeArea.getBoundingClientRect();
           const candle = document.createElement('div');
           candle.className = 'candle';
-          candle.textContent = '🕯️';
+          // 修改：使用candle.png图片替换emoji
+          candle.innerHTML = `<img src="images/candle.png" alt="candle">`;
           candle.style.left = (e.clientX - rect.left - 24) + 'px';
           candle.style.top = (e.clientY - rect.top - 48) + 'px';
           decorLayer.appendChild(candle);
@@ -1182,18 +1217,7 @@
       const palette = document.getElementById('emojiPalette');
       palette.innerHTML = '';
 
-      emojis.forEach(emoji => {
-        const item = document.createElement('div');
-        item.className = 'emoji-item';
-        item.textContent = emoji;
-
-        item.onmouseenter = (e) => showHoverPreview(e, emoji, 'emoji');
-        item.onmouseleave = hideHoverPreview;
-
-        setupDrag(item, emoji, 'emoji');
-        palette.appendChild(item);
-      });
-
+      // 修改：先添加四个png素材，再添加emoji
       extraImages.forEach(imgData => {
         const item = document.createElement('div');
         item.className = 'emoji-item';
@@ -1209,6 +1233,19 @@
         item.onmouseleave = hideHoverPreview;
 
         setupDrag(item, imgData.src, 'image');
+        palette.appendChild(item);
+      });
+
+      // emoji放在后面
+      emojis.forEach(emoji => {
+        const item = document.createElement('div');
+        item.className = 'emoji-item';
+        item.textContent = emoji;
+
+        item.onmouseenter = (e) => showHoverPreview(e, emoji, 'emoji');
+        item.onmouseleave = hideHoverPreview;
+
+        setupDrag(item, emoji, 'emoji');
         palette.appendChild(item);
       });
     }
@@ -1360,6 +1397,7 @@
 
       localStorage.removeItem('cakeProgress');
 
+      // 播放new.mp3作为庆祝音乐
       try {
         AudioManager.bg.play().catch(e => {});
       } catch(e) {}
@@ -1376,7 +1414,7 @@
         setTimeout(() => {
           const c = document.createElement('div');
           c.className = 'confetti';
-          c.textContent = ['🎀', '🎉', '🎈', '🎁', '✨', '💖'][Math.floor(Math.random() * 6)];
+          c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
           c.style.left = Math.random() * 100 + 'vw';
           c.style.animationDuration = (3 + Math.random() * 2) + 's';
           celebration.appendChild(c);
@@ -1385,11 +1423,12 @@
       }
     }
 
+    // 全局禁用右键菜单，避免干扰游戏体验
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
     // 初始化
     checkSavedProgress();
     updateStep();
   </script>
 </body>
 </html>
-
-
