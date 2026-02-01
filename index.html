@@ -188,12 +188,10 @@
       transition: all 0.5s;
     }
 
-    /* 拍打环节自定义光标 - 8.png 擀面杖 */
     .cake-workspace.fluff-cursor {
       cursor: url('images/8.png') 16 16, grab;
     }
 
-    /* 如果图片加载失败，使用兜底光标 */
     @media (pointer: coarse) {
       .cake-workspace.fluff-cursor {
         cursor: grab;
@@ -233,7 +231,6 @@
       z-index: 10;
     }
 
-    /* 奶油 - 简化版 */
     .cream-flower {
       position: absolute;
       width: 96px;
@@ -254,7 +251,6 @@
       100% { transform: scale(1) rotate(360deg); opacity: 1; }
     }
 
-    /* 水果样式 - 修改大小 */
     .static-fruit {
       position: absolute;
       width: 30px;
@@ -264,13 +260,11 @@
       animation: fruitDrop 0.5s ease-out forwards;
     }
 
-    /* strawberry - 1.3倍 (39px) */
     .static-fruit.strawberry {
       width: 39px;
       height: 39px;
     }
 
-    /* blue和lemon - 0.8倍 (48px)，原来是60px，现在是48px */
     .static-fruit.medium {
       width: 48px;
       height: 48px;
@@ -288,7 +282,6 @@
       100% { transform: scale(1) translateY(0); }
     }
 
-    /* 蜡烛样式 - 使用图片替换emoji */
     .candle {
       position: absolute;
       width: 48px;
@@ -333,6 +326,12 @@
       height: 50px;
       object-fit: contain;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    /* Q_ghy2.png 特殊大小 1.7倍 (85px) */
+    .decoration-img.qghy2 {
+      width: 85px;
+      height: 85px;
     }
 
     @keyframes decorPlace {
@@ -477,6 +476,15 @@
       width: 50px;
       height: 50px;
       object-fit: contain;
+    }
+
+    /* Q_ghy2拖拽时幽灵也放大 */
+    .dragging-ghost.qghy-large {
+      font-size: 60px;
+    }
+    .dragging-ghost.qghy-large img {
+      width: 85px;
+      height: 85px;
     }
 
     .toast {
@@ -637,7 +645,7 @@
   <div class="hover-preview" id="hoverPreview"></div>
 
   <script>
-    // 音频管理 - 使用new.mp3作为庆祝音乐
+    // 音频管理 - 包含之前版本的蓬松拍打音效
     const AudioManager = {
       cream: null,
       bg: null,
@@ -647,7 +655,7 @@
       init() {
         try {
           this.cream = new Audio('music/cream.mp3');
-          this.bg = new Audio('music/new.mp3');  // 修改：使用new.mp3作为庆祝音乐
+          this.bg = new Audio('music/new.mp3');
           this.fluff = new Audio('music/fluff.mp3');
           this.initialized = true;
         } catch(e) {
@@ -655,23 +663,14 @@
         }
       },
 
-      playCream() {
-        if (!this.initialized || !this.cream) return;
-        try {
-          const pitch = 0.8 + Math.random() * 0.4;
-          const audio = this.cream.cloneNode();
-          audio.playbackRate = pitch;
-          audio.volume = 0.5;
-          audio.play().catch(() => {});
-        } catch(e) {}
-      },
-
       playFluff() {
         if (!this.initialized) return;
         try {
-          const pitch = 0.9 + Math.random() * 0.2;
-          const audio = (this.fluff || this.cream).cloneNode();
-          audio.playbackRate = pitch;
+          const audio = this.fluff && this.fluff.src ? this.fluff.cloneNode() : 
+                       (this.cream && this.cream.src ? this.cream.cloneNode() : null);
+          if (!audio) return;
+          // 随机音调 0.9-1.1 倍模拟真实拍打
+          audio.playbackRate = 0.9 + Math.random() * 0.2;
           audio.volume = 0.6;
           audio.play().catch(() => {});
         } catch(e) {}
@@ -687,10 +686,9 @@
         } catch(e) {}
       }
     };
-
     AudioManager.init();
 
-    // 步骤配置 - 修改：第三步及之后使用3.jpg作为底图
+    // 步骤配置
     const steps = [
       { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
       { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
@@ -707,15 +705,27 @@
     let decorations = [];
     let hasLitCandle = false;
 
+    // 拍打提示语数组
+    const fluffMessages = [
+      '蓬松度 +1',
+      '蛋糕胚变松软了～',
+      '手感越来越好了！',
+      '继续拍，更蓬松✨',
+      '蛋糕胚快要蓬松了',
+      '已经很完美了！',
+      '再打就飞起来了🎈',
+      '松软度UP！',
+      '完美蛋糕胚制作中...'
+    ];
+
     const emojis = ['🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🐱', '🎀'];
     const fruits = ['images/blue.png', 'images/lemon.png', 'images/strawberry.png'];
-    // 修改：blue和lemon现在是0.8倍（48px），strawberry是1.3倍（39px）
-    const mediumFruits = ['images/blue.png', 'images/lemon.png']; // 48px
-    const largeFruits = ['images/strawberry.png']; // 39px（相对原来的30px是1.3倍）
+    const mediumFruits = ['images/blue.png', 'images/lemon.png'];
+    const largeFruits = ['images/strawberry.png'];
 
     const extraImages = [
       { src: 'images/fox2.png', name: 'fox2' },
-      { src: 'images/Q_ghy2.png', name: 'qghy2' },
+      { src: 'images/Q_ghy2.png', name: 'qghy2', scale: 1.7 }, // 标记为1.7倍
       { src: 'images/q_hanyu.png', name: 'qhanyu' },
       { src: 'images/fox.png', name: 'fox' }
     ];
@@ -803,10 +813,11 @@
       document.getElementById('cakeArea').classList.remove('candle-ambiance');
     }
 
-    function showFluffPopup(x, y) {
+    // 显示随机提示语
+    function showFluffPopupWithMessage(x, y, message) {
       const popup = document.createElement('div');
       popup.className = 'fluff-popup';
-      popup.textContent = '蓬松度 +1';
+      popup.textContent = message;
       popup.style.left = x + 'px';
       popup.style.top = y + 'px';
       document.getElementById('cakeArea').appendChild(popup);
@@ -850,18 +861,15 @@
         removeCandleAmbiance();
       }
 
-      // 处理第三步清除奶油痕迹
       if (step.clearCream) {
         clearCreamTraces();
       }
     }
 
-    // 清除奶油痕迹
     function clearCreamTraces() {
       const decorLayer = document.getElementById('decorationsLayer');
       const creams = decorLayer.querySelectorAll('.cream-flower');
       creams.forEach(cream => cream.remove());
-      // 同时从decorations数组中移除
       decorations = decorations.filter(d => d.step !== 1);
     }
 
@@ -880,15 +888,14 @@
       cakeArea.ontouchmove = null;
       cakeArea.ontouchend = null;
 
-      // 关键：先移除fluff-cursor类
       cakeArea.classList.remove('fluff-cursor');
       cakeArea.style.cursor = 'default';
 
       if (step.action === 'fluff') {
         let pressing = false;
         let interval;
+        let lastMsgIndex = -1;
 
-        // 关键：重新添加fluff-cursor类
         cakeArea.classList.add('fluff-cursor');
 
         const startFluff = (e) => {
@@ -896,6 +903,7 @@
           pressing = true;
           workImage.style.transform = 'scale(0.95, 1.05)';
 
+          // 播放拍打音效
           AudioManager.playFluff();
 
           const rect = cakeArea.getBoundingClientRect();
@@ -903,20 +911,34 @@
           const clientY = e.clientY || (e.touches && e.touches[0].clientY);
           const x = clientX - rect.left;
           const y = clientY - rect.top;
-          showFluffPopup(x - 40, y - 40);
+
+          // 随机选择提示语（避免连续重复）
+          let msgIndex;
+          do {
+            msgIndex = Math.floor(Math.random() * fluffMessages.length);
+          } while (msgIndex === lastMsgIndex && fluffMessages.length > 1);
+          lastMsgIndex = msgIndex;
+
+          showFluffPopupWithMessage(x - 40, y - 40, fluffMessages[msgIndex]);
 
           interval = setInterval(() => {
-            if (fluffiness < 100) {
-              fluffiness = Math.min(fluffiness + 5, 100);
+            if (fluffiness < 50) { // 修改：总进度50（缩短一半）
+              fluffiness = Math.min(fluffiness + 2, 50); // 每次+2，总次数25次左右
               updateProgressDisplay();
 
-              if (fluffiness % 10 === 0 && fluffiness < 100) {
-                showFluffPopup(x - 40 + (Math.random() * 20 - 10), y - 40 + (Math.random() * 20 - 10));
+              // 每5点播放一次音效并显示新提示
+              if (fluffiness % 5 === 0 && fluffiness < 50) {
                 AudioManager.playFluff();
+                let newMsgIndex;
+                do {
+                  newMsgIndex = Math.floor(Math.random() * fluffMessages.length);
+                } while (newMsgIndex === lastMsgIndex);
+                lastMsgIndex = newMsgIndex;
+                showFluffPopupWithMessage(x - 40 + (Math.random() * 20 - 10), y - 40 + (Math.random() * 20 - 10), fluffMessages[newMsgIndex]);
               }
             }
 
-            if (fluffiness >= 100) {
+            if (fluffiness >= 50) {
               clearInterval(interval);
               showToast('蛋糕已经很蓬松了！');
               saveProgress();
@@ -945,7 +967,7 @@
         let isPressed = false;
 
         const addCreamAt = (x, y) => {
-          AudioManager.playCream();
+          AudioManager.playFluff();
 
           const cream = document.createElement('div');
           cream.className = 'cream-flower';
@@ -1074,13 +1096,12 @@
           const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
           fruit.innerHTML = `<img src="${randomFruit}" alt="fruit">`;
 
-          // 修改：根据水果类型设置不同大小
-          let offset = 15; // 默认30px/2
+          let offset = 15;
           if (randomFruit.includes('strawberry')) {
-            fruit.classList.add('strawberry'); // 39px
+            fruit.classList.add('strawberry');
             offset = 19.5;
           } else {
-            fruit.classList.add('medium'); // blue和lemon 48px
+            fruit.classList.add('medium');
             offset = 24;
           }
 
@@ -1114,7 +1135,6 @@
           const rect = cakeArea.getBoundingClientRect();
           const candle = document.createElement('div');
           candle.className = 'candle';
-          // 修改：使用candle.png图片替换emoji
           candle.innerHTML = `<img src="images/candle.png" alt="candle">`;
           candle.style.left = (e.clientX - rect.left - 24) + 'px';
           candle.style.top = (e.clientY - rect.top - 48) + 'px';
@@ -1207,7 +1227,7 @@
     function updateProgressDisplay(current, max) {
       const fill = document.getElementById('progressFill');
       if (currentStep === 0) {
-        fill.style.width = fluffiness + '%';
+        fill.style.width = (fluffiness / 50 * 100) + '%'; // 修改：基于50的总量
       } else if (current !== undefined && max) {
         fill.style.width = (current / max * 100) + '%';
       }
@@ -1217,7 +1237,6 @@
       const palette = document.getElementById('emojiPalette');
       palette.innerHTML = '';
 
-      // 修改：先添加四个png素材，再添加emoji
       extraImages.forEach(imgData => {
         const item = document.createElement('div');
         item.className = 'emoji-item';
@@ -1232,11 +1251,10 @@
         item.onmouseenter = (e) => showHoverPreview(e, imgData.src, 'image');
         item.onmouseleave = hideHoverPreview;
 
-        setupDrag(item, imgData.src, 'image');
+        setupDrag(item, imgData.src, 'image', imgData.scale || 1); // 传递缩放比例
         palette.appendChild(item);
       });
 
-      // emoji放在后面
       emojis.forEach(emoji => {
         const item = document.createElement('div');
         item.className = 'emoji-item';
@@ -1245,7 +1263,7 @@
         item.onmouseenter = (e) => showHoverPreview(e, emoji, 'emoji');
         item.onmouseleave = hideHoverPreview;
 
-        setupDrag(item, emoji, 'emoji');
+        setupDrag(item, emoji, 'emoji', 1);
         palette.appendChild(item);
       });
     }
@@ -1275,17 +1293,24 @@
       }
     });
 
-    function setupDrag(item, content, type) {
+    function setupDrag(item, content, type, scale = 1) {
       const startDrag = (x, y) => {
         hideHoverPreview();
 
         const ghost = document.createElement('div');
         ghost.className = 'dragging-ghost';
+
+        // Q_ghy2 特殊处理放大
+        const isQghy = content.includes('Q_ghy2');
+        if (isQghy) {
+          ghost.classList.add('qghy-large');
+        }
+
         if (type === 'emoji') {
           ghost.textContent = content;
           ghost.style.fontSize = '36px';
         } else {
-          ghost.innerHTML = `<img src="${content}" style="width:50px;height:50px;object-fit:contain;">`;
+          ghost.innerHTML = `<img src="${content}" style="width:${50 * scale}px;height:${50 * scale}px;object-fit:contain;">`;
         }
         ghost.style.left = x + 'px';
         ghost.style.top = y + 'px';
@@ -1319,9 +1344,11 @@
             } else {
               const decor = document.createElement('img');
               decor.className = 'decoration-img';
+              if (isQghy) decor.classList.add('qghy2'); // 添加特殊类
               decor.src = content;
-              decor.style.left = (cx - cakeRect.left - 25) + 'px';
-              decor.style.top = (cy - cakeRect.top - 25) + 'px';
+              const size = isQghy ? 42.5 : 25; // Q_ghy2 85px/2=42.5, 其他50px/2=25
+              decor.style.left = (cx - cakeRect.left - size) + 'px';
+              decor.style.top = (cy - cakeRect.top - size) + 'px';
               document.getElementById('decorationsLayer').appendChild(decor);
               trackDecoration(decor);
             }
@@ -1397,7 +1424,6 @@
 
       localStorage.removeItem('cakeProgress');
 
-      // 播放new.mp3作为庆祝音乐
       try {
         AudioManager.bg.play().catch(e => {});
       } catch(e) {}
@@ -1423,12 +1449,11 @@
       }
     }
 
-    // 全局禁用右键菜单，避免干扰游戏体验
     document.addEventListener('contextmenu', event => event.preventDefault());
 
-    // 初始化
     checkSavedProgress();
     updateStep();
   </script>
 </body>
 </html>
+
