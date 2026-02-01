@@ -698,13 +698,15 @@
 
     // 步骤配置
     const steps = [
-      { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
-      { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
-      { guide: 'images/3.jpg', work: 'images/3.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true, clearCream: true },
-      { guide: 'images/4.jpg', work: 'images/3.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
-      { guide: 'images/5.jpg', work: 'images/3.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
-      { guide: 'images/6.jpg', work: 'images/3.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
-    ];
+  { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
+  { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
+  
+  // 第三步开始及之后，替换蛋糕底图
+  { guide: 'images/3.jpg', work: 'images/creamcake.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true, clearCream: true },
+  { guide: 'images/4.jpg', work: 'images/creamcake.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
+  { guide: 'images/5.jpg', work: 'images/creamcake.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
+  { guide: 'images/6.jpg', work: 'images/creamcake.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
+];
 
     let currentStep = 0;
     let fluffiness = 0;
@@ -1493,6 +1495,7 @@
   </script>
 </body>
 </html>
+
 
 
 
