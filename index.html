@@ -328,10 +328,16 @@
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     }
 
-    /* Q_ghy2.png 特殊大小 1.7倍 (85px) */
-    .decoration-img.qghy2 {
+    /* q_hanyu.png 1.7倍大小 (85px) */
+    .decoration-img.qhanyu-large {
       width: 85px;
       height: 85px;
+    }
+
+    /* Q_ghy2.png 缩小一半 (25px) */
+    .decoration-img.qghy2 {
+      width: 25px;
+      height: 25px;
     }
 
     @keyframes decorPlace {
@@ -478,13 +484,16 @@
       object-fit: contain;
     }
 
-    /* Q_ghy2拖拽时幽灵也放大 */
-    .dragging-ghost.qghy-large {
-      font-size: 60px;
-    }
-    .dragging-ghost.qghy-large img {
+    /* q_hanyu 拖拽幽灵 1.7倍 */
+    .dragging-ghost.qhanyu-large img {
       width: 85px;
       height: 85px;
+    }
+
+    /* Q_ghy2 拖拽幽灵 0.5倍 */
+    .dragging-ghost.qghy2 img {
+      width: 25px;
+      height: 25px;
     }
 
     .toast {
@@ -645,7 +654,7 @@
   <div class="hover-preview" id="hoverPreview"></div>
 
   <script>
-    // 音频管理 - 包含之前版本的蓬松拍打音效
+    // 音频管理
     const AudioManager = {
       cream: null,
       bg: null,
@@ -669,9 +678,8 @@
           const audio = this.fluff && this.fluff.src ? this.fluff.cloneNode() : 
                        (this.cream && this.cream.src ? this.cream.cloneNode() : null);
           if (!audio) return;
-          // 随机音调 0.9-1.1 倍模拟真实拍打
           audio.playbackRate = 2.0 + Math.random() * 0.2;
-          audio.volume = 2.0;  // 调大打声音效
+          audio.volume = 2.0;
           audio.play().catch(() => {});
         } catch(e) {}
       },
@@ -722,11 +730,12 @@
     const mediumFruits = ['images/blue.png', 'images/lemon.png'];
     const largeFruits = ['images/strawberry.png'];
 
+    // 修改：q_hanyu放大1.7倍(85px)，Q_ghy2缩小一半(25px)
     const extraImages = [
-      { src: 'images/fox2.png', name: 'fox2' },
-      { src: 'images/Q_ghy2.png', name: 'qghy2' }, // 标记为1.7倍
-      { src: 'images/q_hanyu.png', name: 'qhanyu', scale: 1.7 },
-      { src: 'images/fox.png', name: 'fox' }
+      { src: 'images/fox2.png', name: 'fox2', scale: 1 },
+      { src: 'images/Q_ghy2.png', name: 'qghy2', scale: 0.5 },  // 缩小一半
+      { src: 'images/q_hanyu.png', name: 'qhanyu', scale: 1.7 }, // 放大1.7倍
+      { src: 'images/fox.png', name: 'fox', scale: 1 }
     ];
 
     function showToast(msg) {
@@ -812,7 +821,6 @@
       document.getElementById('cakeArea').classList.remove('candle-ambiance');
     }
 
-    // 显示随机提示语
     function showFluffPopupWithMessage(x, y, message) {
       const popup = document.createElement('div');
       popup.className = 'fluff-popup';
@@ -902,7 +910,6 @@
           pressing = true;
           workImage.style.transform = 'scale(0.95, 1.05)';
 
-          // 播放拍打音效
           AudioManager.playFluff();
 
           const rect = cakeArea.getBoundingClientRect();
@@ -911,7 +918,6 @@
           const x = clientX - rect.left;
           const y = clientY - rect.top;
 
-          // 随机选择提示语（避免连续重复）
           let msgIndex;
           do {
             msgIndex = Math.floor(Math.random() * fluffMessages.length);
@@ -921,11 +927,10 @@
           showFluffPopupWithMessage(x - 40, y - 40, fluffMessages[msgIndex]);
 
           interval = setInterval(() => {
-            if (fluffiness < 50) { // 修改：总进度50（缩短一半）
-              fluffiness = Math.min(fluffiness + 2, 50); // 每次+2，总次数25次左右
+            if (fluffiness < 50) {
+              fluffiness = Math.min(fluffiness + 2, 50);
               updateProgressDisplay();
 
-              // 每5点播放一次音效并显示新提示
               if (fluffiness % 5 === 0 && fluffiness < 50) {
                 AudioManager.playFluff();
                 let newMsgIndex;
@@ -1226,7 +1231,7 @@
     function updateProgressDisplay(current, max) {
       const fill = document.getElementById('progressFill');
       if (currentStep === 0) {
-        fill.style.width = (fluffiness / 50 * 100) + '%'; // 修改：基于50的总量
+        fill.style.width = (fluffiness / 50 * 100) + '%';
       } else if (current !== undefined && max) {
         fill.style.width = (current / max * 100) + '%';
       }
@@ -1250,7 +1255,7 @@
         item.onmouseenter = (e) => showHoverPreview(e, imgData.src, 'image');
         item.onmouseleave = hideHoverPreview;
 
-        setupDrag(item, imgData.src, 'image', imgData.scale || 1); // 传递缩放比例
+        setupDrag(item, imgData.src, 'image', imgData.scale || 1);
         palette.appendChild(item);
       });
 
@@ -1299,10 +1304,11 @@
         const ghost = document.createElement('div');
         ghost.className = 'dragging-ghost';
 
-        // Q_ghy2 特殊处理放大
-        const isQghy = content.includes('Q_ghy2');
-        if (isQghy) {
-          ghost.classList.add('qghy-large');
+        // 根据图片类型添加对应类名以应用正确的尺寸
+        if (content.includes('q_hanyu')) {
+          ghost.classList.add('qhanyu-large');
+        } else if (content.includes('Q_ghy2')) {
+          ghost.classList.add('qghy2');
         }
 
         if (type === 'emoji') {
@@ -1343,9 +1349,17 @@
             } else {
               const decor = document.createElement('img');
               decor.className = 'decoration-img';
-              if (isQghy) decor.classList.add('qghy2'); // 添加特殊类
+              
+              // 添加对应类名以应用CSS尺寸
+              if (content.includes('q_hanyu')) {
+                decor.classList.add('qhanyu-large'); // 85px
+              } else if (content.includes('Q_ghy2')) {
+                decor.classList.add('qghy2'); // 25px
+              }
+              
               decor.src = content;
-              const size = isQghy ? 42.5 : 25; // Q_ghy2 85px/2=42.5, 其他50px/2=25
+              // 根据scale计算半宽作为偏移量：(50 * scale) / 2
+              const size = (50 * scale) / 2;
               decor.style.left = (cx - cakeRect.left - size) + 'px';
               decor.style.top = (cy - cakeRect.top - size) + 'px';
               document.getElementById('decorationsLayer').appendChild(decor);
@@ -1417,68 +1431,61 @@
       showToast('已重置当前步骤');
     }
 
-function finish() {
-  document.getElementById('makeStage').style.display = 'none';
-  document.getElementById('resultPage').style.display = 'block';
+    // 修复：直接克隆整个工作区，确保装饰位置完全一致，解决移位问题
+    function finish() {
+      document.getElementById('makeStage').style.display = 'none';
+      document.getElementById('resultPage').style.display = 'block';
 
-  localStorage.removeItem('cakeProgress');
+      localStorage.removeItem('cakeProgress');
 
-  try {
-    AudioManager.bg.play().catch(e => {});
-  } catch(e) {}
+      try {
+        AudioManager.bg.play().catch(e => {});
+      } catch(e) {}
 
-  const playerCake = document.getElementById('playerCake');
-  playerCake.innerHTML = ''; // 清空之前的内容
-  
-  // 直接克隆整个蛋糕工作区，确保装饰坐标完全一致
-  const cakeArea = document.getElementById('cakeArea');
-  const clone = cakeArea.cloneNode(true);
-  
-  // 设置新ID并移除交互状态
-  clone.id = 'finalCakeDisplay';
-  clone.className = 'cake-workspace'; // 保留基础样式，移除交互类如 fluff-cursor
-  clone.style.cursor = 'default';
-  clone.style.touchAction = 'auto';
-  
-  // 关键：固定尺寸为350x350px，确保与原工作区像素级一致，防止响应式变形导致移位
-  clone.style.width = '350px';
-  clone.style.height = '350px';
-  clone.style.maxWidth = 'none';
-  clone.style.margin = '0 auto';
-  
-  // 清理所有交互事件，仅保留展示
-  const interactiveElements = clone.querySelectorAll('.candle, .static-fruit, .decoration-img, .decoration-emoji');
-  interactiveElements.forEach(el => {
-    el.style.cursor = 'default';
-    el.onclick = null;
-    el.onmousedown = null;
-    el.ontouchstart = null;
-  });
-  
-  // 移除蜡烛动画（可选，如果希望结果页面是静态的）
-  const litCandles = clone.querySelectorAll('.candle.lit');
-  litCandles.forEach(candle => {
-    candle.style.animation = 'none';
-    // 保留发光滤镜作为静态效果
-    candle.style.filter = 'drop-shadow(0 0 8px #ff6b35) drop-shadow(0 0 16px #ffd93d)';
-  });
-  
-  playerCake.appendChild(clone);
+      const playerCake = document.getElementById('playerCake');
+      playerCake.innerHTML = ''; // 清空之前的内容
+      
+      // 克隆整个蛋糕工作区
+      const cakeArea = document.getElementById('cakeArea');
+      const clone = cakeArea.cloneNode(true);
+      
+      // 设置新ID并清理交互状态
+      clone.id = 'finalCakeDisplay';
+      clone.className = 'cake-workspace';
+      clone.style.cursor = 'default';
+      clone.style.touchAction = 'auto';
+      
+      // 固定尺寸确保坐标系一致（防止响应式布局导致的偏移）
+      clone.style.width = '350px';
+      clone.style.height = '350px';
+      clone.style.maxWidth = 'none';
+      clone.style.margin = '0 auto';
+      
+      // 清除所有交互事件
+      clone.onmousedown = null;
+      clone.onmousemove = null;
+      clone.onmouseup = null;
+      clone.onclick = null;
+      clone.ontouchstart = null;
+      clone.ontouchmove = null;
+      clone.ontouchend = null;
+      
+      playerCake.appendChild(clone);
 
-  // 庆祝动画保持不变
-  const celebration = document.getElementById('celebration');
-  for (let i = 0; i < 40; i++) {
-    setTimeout(() => {
-      const c = document.createElement('div');
-      c.className = 'confetti';
-      c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
-      c.style.left = Math.random() * 100 + 'vw';
-      c.style.animationDuration = (3 + Math.random() * 2) + 's';
-      celebration.appendChild(c);
-      setTimeout(() => c.remove(), 5000);
-    }, i * 50);
-  }
-}
+      // 庆祝动画
+      const celebration = document.getElementById('celebration');
+      for (let i = 0; i < 40; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
+          c.style.left = Math.random() * 100 + 'vw';
+          c.style.animationDuration = (3 + Math.random() * 2) + 's';
+          celebration.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 50);
+      }
+    }
 
     document.addEventListener('contextmenu', event => event.preventDefault());
 
@@ -1487,6 +1494,7 @@ function finish() {
   </script>
 </body>
 </html>
+
 
 
 
