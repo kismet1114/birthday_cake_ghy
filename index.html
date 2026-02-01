@@ -1417,36 +1417,68 @@
       showToast('已重置当前步骤');
     }
 
-    function finish() {
-      document.getElementById('makeStage').style.display = 'none';
-      document.getElementById('resultPage').style.display = 'block';
+function finish() {
+  document.getElementById('makeStage').style.display = 'none';
+  document.getElementById('resultPage').style.display = 'block';
 
-      localStorage.removeItem('cakeProgress');
+  localStorage.removeItem('cakeProgress');
 
-      try {
-        AudioManager.bg.play().catch(e => {});
-      } catch(e) {}
+  try {
+    AudioManager.bg.play().catch(e => {});
+  } catch(e) {}
 
-      const playerCake = document.getElementById('playerCake');
-      const workImg = document.getElementById('workImage').cloneNode();
-      const decorClone = document.getElementById('decorationsLayer').cloneNode(true);
+  const playerCake = document.getElementById('playerCake');
+  playerCake.innerHTML = ''; // 清空之前的内容
+  
+  // 直接克隆整个蛋糕工作区，确保装饰坐标完全一致
+  const cakeArea = document.getElementById('cakeArea');
+  const clone = cakeArea.cloneNode(true);
+  
+  // 设置新ID并移除交互状态
+  clone.id = 'finalCakeDisplay';
+  clone.className = 'cake-workspace'; // 保留基础样式，移除交互类如 fluff-cursor
+  clone.style.cursor = 'default';
+  clone.style.touchAction = 'auto';
+  
+  // 关键：固定尺寸为350x350px，确保与原工作区像素级一致，防止响应式变形导致移位
+  clone.style.width = '350px';
+  clone.style.height = '350px';
+  clone.style.maxWidth = 'none';
+  clone.style.margin = '0 auto';
+  
+  // 清理所有交互事件，仅保留展示
+  const interactiveElements = clone.querySelectorAll('.candle, .static-fruit, .decoration-img, .decoration-emoji');
+  interactiveElements.forEach(el => {
+    el.style.cursor = 'default';
+    el.onclick = null;
+    el.onmousedown = null;
+    el.ontouchstart = null;
+  });
+  
+  // 移除蜡烛动画（可选，如果希望结果页面是静态的）
+  const litCandles = clone.querySelectorAll('.candle.lit');
+  litCandles.forEach(candle => {
+    candle.style.animation = 'none';
+    // 保留发光滤镜作为静态效果
+    candle.style.filter = 'drop-shadow(0 0 8px #ff6b35) drop-shadow(0 0 16px #ffd93d)';
+  });
+  
+  playerCake.appendChild(clone);
 
-      playerCake.appendChild(workImg);
-      playerCake.appendChild(decorClone);
-
-      const celebration = document.getElementById('celebration');
-      for (let i = 0; i < 40; i++) {
-        setTimeout(() => {
-          const c = document.createElement('div');
-          c.className = 'confetti';
-          c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
-          c.style.left = Math.random() * 100 + 'vw';
-          c.style.animationDuration = (3 + Math.random() * 2) + 's';
-          celebration.appendChild(c);
-          setTimeout(() => c.remove(), 5000);
-        }, i * 50);
-      }
-    }
+  // 庆祝动画保持不变
+  const celebration = document.getElementById('celebration');
+  for (let i = 0; i < 40; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.animationDuration = (3 + Math.random() * 2) + 's';
+      celebration.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
+    }, i * 50);
+  }
+}
 
     document.addEventListener('contextmenu', event => event.preventDefault());
 
@@ -1455,6 +1487,7 @@
   </script>
 </body>
 </html>
+
 
 
 
