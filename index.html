@@ -633,7 +633,7 @@
         </div>
       </div>
     </div>
-    <div class="final-message">高瀚宇<br>生日快乐！🎂</div>
+    <div class="final-message"><br>生日快乐！🎂</div>
     <div class="button-group">
       <button class="btn" onclick="location.reload()">再做一个 🔄</button>
     </div>
@@ -670,8 +670,8 @@
                        (this.cream && this.cream.src ? this.cream.cloneNode() : null);
           if (!audio) return;
           // 随机音调 0.9-1.1 倍模拟真实拍打
-          audio.playbackRate = 0.9 + Math.random() * 0.2;
-          audio.volume = 0.9;  // 调大打声音效
+          audio.playbackRate = 2.0 + Math.random() * 0.2;
+          audio.volume = 2.0;  // 调大打声音效
           audio.play().catch(() => {});
         } catch(e) {}
       },
@@ -1455,5 +1455,6 @@
   </script>
 </body>
 </html>
+
 
 
