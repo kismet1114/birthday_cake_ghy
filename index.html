@@ -593,7 +593,7 @@
       <div class="guide-panel" id="guidePanel">
         <div class="guide-label">📖 制作指引</div>
         <img src="images/1.jpg" class="guide-image" id="guideImage" alt="指引图">
-        <div class="guide-text" id="guideText">首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松</div>
+        <div class="guide-text" id="guideText">首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松</div>
       </div>
 
       <div class="work-panel" style="position: relative;" id="workPanel">
@@ -671,7 +671,7 @@
           if (!audio) return;
           // 随机音调 0.9-1.1 倍模拟真实拍打
           audio.playbackRate = 0.9 + Math.random() * 0.2;
-          audio.volume = 0.6;
+          audio.volume = 0.9;  // 调大打声音效
           audio.play().catch(() => {});
         } catch(e) {}
       },
@@ -690,7 +690,7 @@
 
     // 步骤配置
     const steps = [
-      { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住右侧蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
+      { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
       { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
       { guide: 'images/3.jpg', work: 'images/3.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true, clearCream: true },
       { guide: 'images/4.jpg', work: 'images/3.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
@@ -713,9 +713,8 @@
       '继续拍，更蓬松✨',
       '蛋糕胚快要蓬松了',
       '已经很完美了！',
-      '再打就飞起来了🎈',
-      '松软度UP！',
-      '完美蛋糕胚制作中...'
+      '蛋糕蓬松的要飞起来了🎈',
+      '松软度UP！'
     ];
 
     const emojis = ['🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🐱', '🎀'];
@@ -725,8 +724,8 @@
 
     const extraImages = [
       { src: 'images/fox2.png', name: 'fox2' },
-      { src: 'images/Q_ghy2.png', name: 'qghy2', scale: 1.7 }, // 标记为1.7倍
-      { src: 'images/q_hanyu.png', name: 'qhanyu' },
+      { src: 'images/Q_ghy2.png', name: 'qghy2' }, // 标记为1.7倍
+      { src: 'images/q_hanyu.png', name: 'qhanyu', scale: 1.7 },
       { src: 'images/fox.png', name: 'fox' }
     ];
 
@@ -1456,4 +1455,5 @@
   </script>
 </body>
 </html>
+
 
