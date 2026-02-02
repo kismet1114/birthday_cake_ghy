@@ -1432,7 +1432,7 @@
       showToast('已重置当前步骤');
     }
 
-    function finish() {
+   function finish() {
   document.getElementById('makeStage').style.display = 'none';
   document.getElementById('resultPage').style.display = 'block';
 
@@ -1445,38 +1445,79 @@
   const playerCake = document.getElementById('playerCake');
   playerCake.innerHTML = '';
   
+  // 获取原始工作区
   const cakeArea = document.getElementById('cakeArea');
+  const workImage = document.getElementById('workImage');
+  const decorLayer = document.getElementById('decorationsLayer');
   
-  // 关键修复：获取原始容器实际渲染尺寸，确保坐标系完全一致
-  const originalWidth = cakeArea.offsetWidth;
-  const originalHeight = cakeArea.offsetHeight;
+  // 关键：获取实际渲染尺寸
+  const rect = cakeArea.getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height;
   
-  const clone = cakeArea.cloneNode(true);
-  clone.id = 'finalCakeDisplay';
+  // 创建新的容器，保持与制作时完全相同的尺寸比例
+  const container = document.createElement('div');
+  container.style.cssText = `
+    position: relative;
+    width: ${width}px;
+    height: ${height}px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.5);
+    border-radius: 16px;
+    overflow: visible;
+  `;
   
-  // 应用与制作时完全相同的实际尺寸，防止因容器宽度变化导致装饰物偏移
-  clone.style.width = originalWidth + 'px';
-  clone.style.height = originalHeight + 'px';
-  clone.style.maxWidth = 'none';
-  clone.style.margin = '0 auto';
-  clone.style.position = 'relative';
+  // 克隆底图（关键修复：确保底图存在）
+  const baseImg = document.createElement('img');
+  baseImg.src = workImage.src;
+  baseImg.className = 'cake-base-img';
+  baseImg.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 16px;
+    z-index: 1;
+  `;
+  container.appendChild(baseImg);
   
-  // 清理交互状态和样式
-  clone.classList.remove('fluff-cursor', 'candle-ambiance');
-  clone.style.cursor = 'default';
-  clone.style.touchAction = 'auto';
+  // 克隆装饰层（关键修复：保持绝对定位坐标不变）
+  const decorClone = decorLayer.cloneNode(true);
+  decorClone.id = 'finalDecorations';
+  decorClone.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  `;
   
-  // 清除所有事件监听
-  clone.onmousedown = null;
-  clone.onmousemove = null;
-  clone.onmouseup = null;
-  clone.onclick = null;
-  clone.onmouseleave = null;
-  clone.ontouchstart = null;
-  clone.ontouchmove = null;
-  clone.ontouchend = null;
+  // 清理克隆装饰层中的交互事件
+  const interactiveElements = decorClone.querySelectorAll('.candle, .static-fruit, .decoration-img, .decoration-emoji, .cream-flower');
+  interactiveElements.forEach(el => {
+    el.style.cursor = 'default';
+    el.onmousedown = null;
+    el.onmousemove = null;
+    el.onmouseup = null;
+    el.onclick = null;
+    el.ontouchstart = null;
+    el.ontouchmove = null;
+    el.ontouchend = null;
+  });
   
-  playerCake.appendChild(clone);
+  // 停止蜡烛动画，保留发光效果
+  const litCandles = decorClone.querySelectorAll('.candle.lit');
+  litCandles.forEach(candle => {
+    candle.style.animation = 'none';
+    candle.style.filter = 'drop-shadow(0 0 8px #ff6b35) drop-shadow(0 0 16px #ffd93d)';
+  });
+  
+  container.appendChild(decorClone);
+  playerCake.appendChild(container);
 
   // 庆祝动画
   const celebration = document.getElementById('celebration');
@@ -1500,6 +1541,7 @@
   </script>
 </body>
 </html>
+
 
 
 
