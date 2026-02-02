@@ -1445,32 +1445,30 @@
   const playerCake = document.getElementById('playerCake');
   playerCake.innerHTML = '';
   
-  // 获取原始工作区
+  // 获取原始元素
   const cakeArea = document.getElementById('cakeArea');
   const workImage = document.getElementById('workImage');
   const decorLayer = document.getElementById('decorationsLayer');
   
-  // 关键：获取实际渲染尺寸
-  const rect = cakeArea.getBoundingClientRect();
-  const width = rect.width;
-  const height = rect.height;
+  // 关键：获取当前步骤对应的底图路径（确保使用当前步骤的正确图片）
+  const currentStepWork = steps[currentStep].work;
   
-  // 创建新的容器，保持与制作时完全相同的尺寸比例
+  // 创建新容器，保持与制作页面完全相同的尺寸
   const container = document.createElement('div');
   container.style.cssText = `
     position: relative;
-    width: ${width}px;
-    height: ${height}px;
+    width: 350px;
+    height: 350px;
     margin: 0 auto;
     background: rgba(255,255,255,0.5);
     border-radius: 16px;
     overflow: visible;
   `;
   
-  // 克隆底图（关键修复：确保底图存在）
+  // 创建底图 - 使用当前步骤的配置，确保图片正确加载
   const baseImg = document.createElement('img');
-  baseImg.src = workImage.src;
-  baseImg.className = 'cake-base-img';
+  // 关键修复：使用 steps 数组中当前步骤的 work 图片，而不是可能已变更的 workImage.src
+  baseImg.src = currentStepWork;
   baseImg.style.cssText = `
     position: absolute;
     top: 0;
@@ -1480,12 +1478,21 @@
     object-fit: contain;
     border-radius: 16px;
     z-index: 1;
+    display: block;
   `;
+  // 确保图片加载完成后再添加装饰
+  baseImg.onload = function() {
+    console.log('底图加载成功:', currentStepWork);
+  };
+  baseImg.onerror = function() {
+    console.error('底图加载失败:', currentStepWork);
+    // 如果失败，尝试使用 workImage 的当前 src
+    baseImg.src = workImage.src;
+  };
   container.appendChild(baseImg);
   
-  // 克隆装饰层（关键修复：保持绝对定位坐标不变）
-  const decorClone = decorLayer.cloneNode(true);
-  decorClone.id = 'finalDecorations';
+  // 克隆装饰层 - 关键：保持所有绝对定位坐标不变
+  const decorClone = document.createElement('div');
   decorClone.style.cssText = `
     position: absolute;
     top: 0;
@@ -1496,24 +1503,39 @@
     z-index: 10;
   `;
   
-  // 清理克隆装饰层中的交互事件
-  const interactiveElements = decorClone.querySelectorAll('.candle, .static-fruit, .decoration-img, .decoration-emoji, .cream-flower');
-  interactiveElements.forEach(el => {
-    el.style.cursor = 'default';
-    el.onmousedown = null;
-    el.onmousemove = null;
-    el.onmouseup = null;
-    el.onclick = null;
-    el.ontouchstart = null;
-    el.ontouchmove = null;
-    el.ontouchend = null;
-  });
-  
-  // 停止蜡烛动画，保留发光效果
-  const litCandles = decorClone.querySelectorAll('.candle.lit');
-  litCandles.forEach(candle => {
-    candle.style.animation = 'none';
-    candle.style.filter = 'drop-shadow(0 0 8px #ff6b35) drop-shadow(0 0 16px #ffd93d)';
+  // 逐个复制装饰元素，保持原始位置和尺寸
+  Array.from(decorLayer.children).forEach(child => {
+    const clone = child.cloneNode(true);
+    
+    // 确保克隆的元素保持原有定位和尺寸
+    const computedStyle = window.getComputedStyle(child);
+    clone.style.position = 'absolute';
+    clone.style.left = child.style.left;
+    clone.style.top = child.style.top;
+    clone.style.width = child.style.width || computedStyle.width;
+    clone.style.height = child.style.height || computedStyle.height;
+    clone.style.transform = child.style.transform;
+    clone.style.zIndex = computedStyle.zIndex;
+    
+    // 清理交互事件
+    clone.onmousedown = null;
+    clone.onmousemove = null;
+    clone.onmouseup = null;
+    clone.onclick = null;
+    clone.onmouseleave = null;
+    clone.ontouchstart = null;
+    clone.ontouchmove = null;
+    clone.ontouchend = null;
+    clone.style.cursor = 'default';
+    clone.style.pointerEvents = 'none';
+    
+    // 停止蜡烛动画但保留发光
+    if (clone.classList.contains('candle') && clone.classList.contains('lit')) {
+      clone.style.animation = 'none';
+      clone.style.filter = 'drop-shadow(0 0 8px #ff6b35) drop-shadow(0 0 16px #ffd93d)';
+    }
+    
+    decorClone.appendChild(clone);
   });
   
   container.appendChild(decorClone);
@@ -1541,6 +1563,7 @@
   </script>
 </body>
 </html>
+
 
 
 
