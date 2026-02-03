@@ -1,12 +1,13 @@
-<!DOCTYPE html>
+
+ultimate_fix = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>奶糕的生日派对蛋糕制作</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
-
+    
     * { 
       box-sizing: border-box; 
       -webkit-tap-highlight-color: transparent; 
@@ -17,15 +18,23 @@
       touch-action: manipulation;
     }
 
-    body {
+    html, body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
       background: linear-gradient(135deg, #ffe6f0 0%, #f8d7ff 100%);
       font-family: "Microsoft YaHei", sans-serif;
-      min-height: 100vh;
+    }
+
+    body {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 10px;
     }
 
     .main-container {
@@ -34,9 +43,17 @@
       background: rgba(255, 255, 255, 0.95);
       border-radius: 24px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      padding: 30px;
+      padding: 20px;
       position: relative;
-      transition: all 0.5s;
+      margin: 10px auto;
+    }
+
+    @media (max-width: 480px) {
+      .main-container {
+        padding: 15px;
+        border-radius: 16px;
+        margin: 5px auto;
+      }
     }
 
     .main-container.candle-lit {
@@ -46,23 +63,23 @@
 
     h1 {
       color: #d32f2f;
-      font-size: 32px;
+      font-size: clamp(22px, 5vw, 32px);
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       font-family: 'ZCOOL KuaiLe', cursive;
     }
 
     .step-indicator {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin-bottom: 30px;
-      position: relative;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .step-dot {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: #e0e0e0;
       transition: all 0.4s;
@@ -70,7 +87,7 @@
 
     .step-dot.active { 
       background: #e91e63; 
-      width: 35px; 
+      width: 30px; 
       border-radius: 15px;
     }
 
@@ -81,21 +98,24 @@
     .workspace {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 25px;
+      gap: 20px;
+      margin-bottom: 20px;
     }
 
     @media (max-width: 768px) {
-      .workspace { grid-template-columns: 1fr; }
+      .workspace { 
+        grid-template-columns: 1fr; 
+        gap: 15px;
+      }
     }
 
     .guide-panel, .work-panel {
       background: linear-gradient(135deg, #fff9fc, #fff0f5);
       border-radius: 20px;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
       border: 2px solid rgba(255, 182, 193, 0.3);
-      transition: all 0.5s;
+      position: relative;
     }
 
     .work-panel.candle-glow {
@@ -113,25 +133,27 @@
       display: inline-block;
       background: #e91e63;
       color: white;
-      padding: 6px 16px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 14px;
-      margin-bottom: 15px;
+      font-size: 13px;
+      margin-bottom: 12px;
       font-weight: bold;
     }
 
     .work-label {
       background: #ff6b9d;
       position: absolute;
-      top: -12px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 10;
     }
 
     .guide-image {
       width: 100%;
-      max-width: 280px;
-      height: 280px;
+      max-width: 260px;
+      height: auto;
+      aspect-ratio: 1;
       object-fit: contain;
       border-radius: 16px;
     }
@@ -139,14 +161,15 @@
     .guide-text {
       margin-top: 10px;
       color: #666;
+      font-size: 14px;
     }
 
     .instruction-text {
       color: #e91e63;
-      font-size: 18px;
+      font-size: clamp(14px, 3.5vw, 17px);
       font-weight: bold;
-      margin: 15px 0;
-      min-height: 50px;
+      margin: 12px 0;
+      min-height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -175,37 +198,42 @@
       transition: width 0.3s;
     }
 
+    /* 
+      ================================================
+      关键修复：蛋糕容器使用固定逻辑坐标系 512x512
+      ================================================
+    */
     .cake-workspace {
       position: relative;
       width: 100%;
-      max-width: 350px;
-      height: 350px;
+      max-width: 320px;
       margin: 0 auto;
-      background: rgba(255,255,255,0.5);
+      /* 使用 padding-bottom 技巧保持 1:1 比例 */
+      padding-bottom: 100%;
+      height: 0;
+      background: rgba(255,255,255,0.3);
       border-radius: 16px;
       overflow: visible;
       touch-action: none;
-      transition: all 0.5s;
     }
 
-    .cake-workspace.fluff-cursor {
-      cursor: url('images/8.png') 16 16, grab;
-    }
-
-    @media (pointer: coarse) {
-      .cake-workspace.fluff-cursor {
-        cursor: grab;
+    @media (max-width: 480px) {
+      .cake-workspace {
+        max-width: 280px;
       }
     }
 
-    .cake-workspace.candle-ambiance {
-      box-shadow: 0 0 60px rgba(255, 150, 50, 0.5), inset 0 0 40px rgba(255, 200, 100, 0.3);
-      animation: cakeGlow 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes cakeGlow {
-      from { box-shadow: 0 0 40px rgba(255, 140, 40, 0.4), inset 0 0 30px rgba(255, 190, 90, 0.2); }
-      to { box-shadow: 0 0 80px rgba(255, 170, 70, 0.7), inset 0 0 50px rgba(255, 210, 130, 0.4); }
+    .cake-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* 
+        内部使用 512x512 逻辑坐标系
+        所有子元素都基于这个坐标系定位
+      */
+      --cake-size: 512;
     }
 
     .cake-base-img {
@@ -229,15 +257,24 @@
       height: 100%;
       pointer-events: none;
       z-index: 10;
+      /* 
+        关键：建立一个与图片完全重合的坐标系
+      */
     }
 
+    /* 装饰元素使用 calc() 基于百分比定位，确保精确 */
     .cream-flower {
       position: absolute;
-      width: 96px;
-      height: 96px;
+      width: calc(96 / var(--cake-size) * 100%);
+      height: auto;
+      aspect-ratio: 1;
       pointer-events: none;
       z-index: 15;
       animation: creamGrow 0.3s ease-out forwards;
+      transform-origin: center center;
+      /* 居中定位 */
+      margin-left: calc(-48 / var(--cake-size) * 100%);
+      margin-top: calc(-48 / var(--cake-size) * 100%);
     }
 
     .cream-flower img {
@@ -253,27 +290,35 @@
 
     .static-fruit {
       position: absolute;
-      width: 30px;
-      height: 30px;
       z-index: 16;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
       animation: fruitDrop 0.5s ease-out forwards;
+      transform-origin: center center;
+      /* 居中 */
+      margin-left: calc(-15 / var(--cake-size) * 100%);
+      margin-top: calc(-15 / var(--cake-size) * 100%);
     }
 
     .static-fruit.strawberry {
-      width: 39px;
-      height: 39px;
+      width: calc(39 / var(--cake-size) * 100%);
+      margin-left: calc(-19.5 / var(--cake-size) * 100%);
+      margin-top: calc(-19.5 / var(--cake-size) * 100%);
     }
 
     .static-fruit.medium {
-      width: 48px;
-      height: 48px;
+      width: calc(48 / var(--cake-size) * 100%);
+      margin-left: calc(-24 / var(--cake-size) * 100%);
+      margin-top: calc(-24 / var(--cake-size) * 100%);
+    }
+
+    .static-fruit:not(.strawberry):not(.medium) {
+      width: calc(30 / var(--cake-size) * 100%);
     }
 
     .static-fruit img {
       width: 100%;
-      height: 100%;
-      object-fit: contain;
+      height: auto;
+      display: block;
     }
 
     @keyframes fruitDrop {
@@ -284,19 +329,21 @@
 
     .candle {
       position: absolute;
-      width: 48px;
-      height: 48px;
+      width: calc(48 / var(--cake-size) * 100%);
+      margin-left: calc(-24 / var(--cake-size) * 100%);
+      margin-top: calc(-48 / var(--cake-size) * 100%); /* 从底部对齐 */
       cursor: pointer;
       z-index: 20;
       transition: transform 0.2s;
       animation: candleInsert 0.3s ease-out;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+      transform-origin: center bottom;
     }
 
     .candle img {
       width: 100%;
-      height: 100%;
-      object-fit: contain;
+      height: auto;
+      display: block;
     }
 
     @keyframes candleInsert {
@@ -309,59 +356,98 @@
       animation: flicker 0.8s ease-in-out infinite alternate;
       filter: drop-shadow(0 0 10px #ff6b35) drop-shadow(0 0 20px #ffd93d);
     }
+
     @keyframes flicker {
       from { transform: scale(1) rotate(-2deg); }
       to { transform: scale(1.05) rotate(2deg); }
     }
 
-    .decoration-emoji, .decoration-img {
+    .decoration-emoji {
       position: absolute;
-      font-size: 28px;
+      font-size: calc(28 / var(--cake-size) * 100%);
       z-index: 20;
       animation: decorPlace 0.3s ease-out;
+      transform-origin: center center;
+      /* 精确居中 */
+      transform: translate(-50%, -50%);
     }
 
     .decoration-img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+      position: absolute;
+      z-index: 20;
+      animation: decorPlace 0.3s ease-out;
+      transform-origin: center center;
     }
 
-    /* q_hanyu.png 1.7倍大小 (85px) */
+    .decoration-img:not(.qhanyu-large):not(.qghy2) {
+      width: calc(50 / var(--cake-size) * 100%);
+      margin-left: calc(-25 / var(--cake-size) * 100%);
+      margin-top: calc(-25 / var(--cake-size) * 100%);
+    }
+
     .decoration-img.qhanyu-large {
-      width: 85px;
-      height: 85px;
+      width: calc(85 / var(--cake-size) * 100%);
+      margin-left: calc(-42.5 / var(--cake-size) * 100%);
+      margin-top: calc(-42.5 / var(--cake-size) * 100%);
     }
 
-    /* Q_ghy2.png 放大至 50px（现在的两倍） */
-.decoration-img.qghy2 {
-  width: 50px;
-  height: 50px;
-}
+    .decoration-img.qghy2 {
+      width: calc(50 / var(--cake-size) * 100%);
+      margin-left: calc(-25 / var(--cake-size) * 100%);
+      margin-top: calc(-25 / var(--cake-size) * 100%);
+    }
 
     @keyframes decorPlace {
       0% { transform: scale(0); }
       100% { transform: scale(1); }
     }
 
+    /* 结果页也使用相同的坐标系 */
+    .result-cake-container {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      padding-bottom: 100%;
+      height: 0;
+      background: #fff9fc;
+      border-radius: 16px;
+      overflow: visible;
+    }
+
+    @media (max-width: 480px) {
+      .result-cake-container {
+        max-width: 280px;
+      }
+    }
+
+    .result-cake-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      --cake-size: 512;
+    }
+
     .emoji-palette {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 15px;
-      padding: 15px;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 12px;
       background: rgba(255,255,255,0.9);
       border-radius: 16px;
-      max-height: 150px;
+      max-height: 140px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .emoji-item {
-      width: 45px;
-      height: 45px;
-      font-size: 24px;
+      width: 42px;
+      height: 42px;
+      font-size: 22px;
       cursor: grab;
       background: white;
       border-radius: 12px;
@@ -370,84 +456,105 @@
       justify-content: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       transition: all 0.2s;
-      overflow: hidden;
-      position: relative;
+      flex-shrink: 0;
     }
 
     .emoji-item img {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       object-fit: contain;
     }
 
-    .emoji-item:hover { 
-      transform: translateY(-3px) scale(1.1); 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .emoji-item:active {
+      transform: scale(0.95);
     }
 
     .button-group {
       display: flex;
       justify-content: center;
-      gap: 15px;
-      margin-top: 20px;
+      gap: 10px;
+      margin-top: 15px;
       flex-wrap: wrap;
     }
 
     .btn {
-      padding: 12px 30px;
+      padding: 10px 22px;
       background: linear-gradient(135deg, #d32f2f, #b71c1c);
       color: white;
       border: none;
       border-radius: 25px;
-      font-size: 16px;
+      font-size: clamp(13px, 3.5vw, 16px);
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(211,47,47,0.3);
-      transition: all 0.3s;
+      transition: all 0.2s;
       font-family: 'ZCOOL KuaiLe', cursive;
-    }
-    .btn:hover { transform: translateY(-2px); }
-    .btn-secondary {
-      background: linear-gradient(135deg, #ff9a9e, #fecfef);
-      color: #d32f2f;
+      touch-action: manipulation;
     }
 
-    .result-page { display: none; animation: fadeIn 1s; }
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      color: #d32f1f;
+    }
+
+    .result-page { 
+      display: none; 
+      animation: fadeIn 0.5s;
+      padding: 10px;
+    }
+
     .result-compare {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin: 30px 0;
+      gap: 20px;
+      margin: 20px 0;
     }
+
     @media (max-width: 768px) {
-      .result-compare { grid-template-columns: 1fr; }
+      .result-compare { 
+        grid-template-columns: 1fr; 
+      }
     }
 
     .result-box {
       background: white;
       border-radius: 20px;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
       box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
 
+    .result-title {
+      font-family: 'ZCOOL KuaiLe', cursive; 
+      color: #e91e63; 
+      margin-bottom: 10px;
+      font-size: clamp(16px, 4vw, 20px);
+    }
+
     .final-message {
-      font-size: 42px;
+      font-size: clamp(28px, 8vw, 42px);
       text-align: center;
-      margin: 30px 0;
+      margin: 20px 0;
       font-family: 'ZCOOL KuaiLe', cursive;
       background: linear-gradient(45deg, #ff6b6b, #f9ca24, #ff9ff3);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: rainbow 3s ease infinite;
+      background-size: 200% 200%;
     }
+
     @keyframes rainbow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .celebration {
@@ -458,131 +565,93 @@
       height: 100%;
       pointer-events: none;
       z-index: 1000;
+      overflow: hidden;
     }
+
     .confetti {
       position: absolute;
-      font-size: 24px;
+      font-size: clamp(16px, 5vw, 24px);
       animation: fall 4s linear forwards;
     }
+
     @keyframes fall {
       0% { transform: translateY(-100px) rotate(0deg); }
       100% { transform: translateY(100vh) rotate(720deg); }
-    }
-
-    .dragging-ghost {
-      position: fixed;
-      font-size: 36px;
-      pointer-events: none;
-      z-index: 1000;
-      transform: translate(-50%, -50%);
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-    }
-
-    .dragging-ghost img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-    }
-
-    /* q_hanyu 拖拽幽灵 1.7倍 */
-    .dragging-ghost.qhanyu-large img {
-      width: 85px;
-      height: 85px;
-    }
-
-    /* Q_ghy2 拖拽幽灵 50px */
-.dragging-ghost.qghy2 img {
-  width: 50px;
-  height: 50px;
-}
-
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      z-index: 2000;
-      opacity: 0;
-      transition: all 0.3s;
-    }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
     }
 
     .fluff-popup {
       position: absolute;
       color: #e91e63;
       font-weight: bold;
-      font-size: 20px;
+      font-size: clamp(13px, 4vw, 16px);
       pointer-events: none;
       z-index: 100;
       animation: floatUp 1s ease-out forwards;
       font-family: 'ZCOOL KuaiLe', cursive;
       text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+      white-space: nowrap;
+      transform: translate(-50%, -50%);
     }
 
     @keyframes floatUp {
-      0% { transform: translateY(0) scale(0.5); opacity: 0; }
-      20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-      100% { transform: translateY(-60px) scale(1); opacity: 0; }
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      20% { transform: translate(-50%, -70%) scale(1.1); opacity: 1; }
+      100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
 
     .save-indicator {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(76, 175, 80, 0.9);
+      top: 15px;
+      right: 15px;
+      background: rgba(76, 175, 80, 0.95);
       color: white;
       padding: 8px 16px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       opacity: 0;
       transition: opacity 0.3s;
       z-index: 3000;
     }
+
     .save-indicator.show { opacity: 1; }
-
-    .hover-preview {
-      position: fixed;
-      pointer-events: none;
-      z-index: 999;
-      opacity: 0.5;
-      transform: translate(-50%, -50%);
-      font-size: 28px;
-      transition: opacity 0.1s;
-    }
-
-    .hover-preview img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-    }
 
     .continue-btn {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255,255,255,0.9);
+      top: 15px;
+      left: 15px;
+      background: rgba(255,255,255,0.95);
       border: 2px solid #e91e63;
       color: #e91e63;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       display: none;
       z-index: 100;
-    }
-    .continue-btn:hover {
-      background: #e91e63;
-      color: white;
+      font-family: 'ZCOOL KuaiLe', cursive;
     }
   </style>
-<base target="_blank">
 </head>
 <body>
   <div class="main-container" id="makeStage">
@@ -599,20 +668,26 @@
     </div>
 
     <div class="workspace">
-      <div class="guide-panel" id="guidePanel">
+      <div class="guide-panel">
         <div class="guide-label">📖 制作指引</div>
-        <img src="images/1.jpg" class="guide-image" id="guideImage" alt="指引图">
+        <img src="images/1.jpg" class="guide-image" id="guideImage" alt="指引图" loading="lazy">
         <div class="guide-text" id="guideText">首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松</div>
       </div>
 
-      <div class="work-panel" style="position: relative;" id="workPanel">
+      <div class="work-panel" id="workPanel">
         <div class="work-label">👩‍🍳 你的工作台</div>
         <div class="instruction-text" id="instruction">第一步：按住蛋糕拍打，让面团膨胀！</div>
         <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
 
-        <div class="cake-workspace fluff-cursor" id="cakeArea">
-          <img src="images/7.png" class="cake-base-img" id="workImage" alt="工作蛋糕">
-          <div class="decorations-layer" id="decorationsLayer"></div>
+        <!-- 
+          关键结构：padding-bottom: 100% 保持正方形
+          内部 cake-inner 是绝对定位的 100% x 100%
+        -->
+        <div class="cake-workspace" id="cakeArea">
+          <div class="cake-inner">
+            <img src="images/7.png" class="cake-base-img" id="workImage" alt="工作蛋糕">
+            <div class="decorations-layer" id="decorationsLayer"></div>
+          </div>
         </div>
 
         <div class="emoji-palette" id="emojiPalette" style="display: none;"></div>
@@ -628,21 +703,24 @@
     </div>
   </div>
 
-  <div class="result-page" id="resultPage" style="display: none;">
+  <div class="result-page" id="resultPage">
     <h1 style="text-align: center; color: #d32f2f; font-family: 'ZCOOL KuaiLe', cursive;">✨ 大功告成 ✨</h1>
     <div class="result-compare">
       <div class="result-box">
-        <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 10px;">🎨 你制作的蛋糕</div>
-        <div class="final-cake-wrapper" id="playerCake" style="position: relative; width: 100%; height: 350px; background: #fff9fc; border-radius: 16px;"></div>
+        <div class="result-title">🎨 你制作的蛋糕</div>
+        <!-- 结果页使用完全相同的结构 -->
+        <div class="result-cake-container" id="playerCake"></div>
       </div>
       <div class="result-box">
-        <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 10px;">✨ 完美成品参考</div>
-        <div style="position: relative; width: 100%; height: 350px; background: #fff9fc; border-radius: 16px;">
-          <img src="images/6.jpg" alt="成品" style="width: 100%; height: 100%; object-fit: contain;">
+        <div class="result-title">✨ 完美成品参考</div>
+        <div class="result-cake-container">
+          <div class="result-cake-inner">
+            <img src="images/6.jpg" alt="成品" style="width: 100%; height: 100%; object-fit: contain; border-radius: 16px;">
+          </div>
         </div>
       </div>
     </div>
-    <div class="final-message"><br>生日快乐！🎂</div>
+    <div class="final-message">生日快乐！🎂</div>
     <div class="button-group">
       <button class="btn" onclick="location.reload()">再做一个 🔄</button>
     </div>
@@ -651,94 +729,93 @@
   <div class="celebration" id="celebration"></div>
   <div class="toast" id="toast"></div>
   <div class="save-indicator" id="saveIndicator">💾 已自动保存</div>
-  <div class="hover-preview" id="hoverPreview"></div>
 
   <script>
-    // 音频管理
-    const AudioManager = {
-      cream: null,
-      bg: null,
-      fluff: null,
-      initialized: false,
-
-      init() {
-        try {
-          this.cream = new Audio('music/cream.mp3');
-          this.bg = new Audio('music/new.mp3');
-          this.fluff = new Audio('music/fluff.mp3');
-          this.initialized = true;
-        } catch(e) {
-          console.log('音频初始化失败');
-        }
-      },
-
-      playFluff() {
-        if (!this.initialized) return;
-        try {
-          const audio = this.fluff && this.fluff.src ? this.fluff.cloneNode() : 
-                       (this.cream && this.cream.src ? this.cream.cloneNode() : null);
-          if (!audio) return;
-          audio.playbackRate = 2.0 + Math.random() * 0.2;
-          audio.volume = 2.0;
-          audio.play().catch(() => {});
-        } catch(e) {}
-      },
-
-      playFruit() {
-        if (!this.initialized || !this.cream) return;
-        try {
-          const audio = this.cream.cloneNode();
-          audio.playbackRate = 1.5;
-          audio.volume = 0.3;
-          audio.play().catch(() => {});
-        } catch(e) {}
-      }
-    };
-    AudioManager.init();
-
-    // 步骤配置
+    // ==========================================
+    // 配置和状态
+    // ==========================================
+    const CAKE_SIZE = 512; // 逻辑坐标系大小
+    
     const steps = [
-  { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
-  { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
-  
-  // 第三步开始及之后，替换蛋糕底图
-  { guide: 'images/3.jpg', work: 'images/creamcake.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true, clearCream: true },
-  { guide: 'images/4.jpg', work: 'images/creamcake.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
-  { guide: 'images/5.jpg', work: 'images/creamcake.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
-  { guide: 'images/6.jpg', work: 'images/creamcake.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
-];
+      { guide: 'images/1.jpg', work: 'images/7.png', instruction: '第一步：按住蛋糕拍打，让面团膨胀！', guideText: '首先准备好蛋糕底胚，按住蛋糕拍打让它变得蓬松', action: 'fluff', hasProgress: true },
+      { guide: 'images/2.jpg', work: 'images/7.png', instruction: '第二步：涂抹奶油（按住拖动涂抹）', guideText: '在蛋糕上均匀涂抹奶油', action: 'cream' },
+      { guide: 'images/3.jpg', work: 'images/creamcake.jpg', instruction: '第三步：点击添加水果装饰', guideText: '挑选新鲜水果点缀蛋糕', action: 'fruit', hasProgress: true, clearCream: true },
+      { guide: 'images/4.jpg', work: 'images/creamcake.jpg', instruction: '第四步：点击插上生日蜡烛（最多5根）', guideText: '插上蜡烛准备庆祝（最多5根）', action: 'candle', hasProgress: true },
+      { guide: 'images/5.jpg', work: 'images/creamcake.jpg', instruction: '第五步：点击蜡烛点燃它们！', guideText: '点击蜡烛点燃它们', action: 'light' },
+      { guide: 'images/6.jpg', work: 'images/creamcake.jpg', instruction: '第六步：拖拽装饰物进行自由装饰', guideText: '最后点缀，让蛋糕更完美！', action: 'decorate' }
+    ];
 
     let currentStep = 0;
     let fluffiness = 0;
     let candleCount = 0;
-    let isDrawing = false;
     let decorations = [];
     let hasLitCandle = false;
+    let lastTouchTime = 0;
 
-    // 拍打提示语数组
-    const fluffMessages = [
-      '蓬松度 +1',
-      '蛋糕胚变松软了～',
-      '手感越来越好了！',
-      '继续拍，更蓬松✨',
-      '蛋糕胚快要蓬松了',
-      '已经很完美了！',
-      '蛋糕蓬松的要飞起来了🎈',
-      '松软度UP！'
+    const fluffMessages = ['蓬松度 +1', '蛋糕胚变松软了～', '手感越来越好了！', '继续拍，更蓬松✨', '蛋糕胚快要蓬松了', '已经很完美了！', '蛋糕蓬松的要飞起来了🎈', '松软度UP！'];
+    const emojis = ['🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐', '🎀'];
+    const fruits = ['images/blue.png', 'images/lemon.png', 'images/strawberry.png'];
+    const extraImages = [
+      { src: 'images/fox2.png', name: 'fox2', scale: 1 },
+      { src: 'images/Q_ghy2.png', name: 'qghy2', scale: 1 },
+      { src: 'images/q_hanyu.png', name: 'qhanyu', scale: 1.7 },
+      { src: 'images/fox.png', name: 'fox', scale: 1 }
     ];
 
-    const emojis = ['🍫', '🍬', '🍭', '🎂', '✨', '💖', '🎁', '🦄', '🌈', '⭐',  '🎀'];
-    const fruits = ['images/blue.png', 'images/lemon.png', 'images/strawberry.png'];
-    const mediumFruits = ['images/blue.png', 'images/lemon.png'];
-    const largeFruits = ['images/strawberry.png'];
+    // ==========================================
+    // 核心坐标转换函数（修复偏移的关键）
+    // ==========================================
+    
+    /**
+     * 获取蛋糕内部元素的矩形信息
+     * 返回的是 .cake-inner 元素的实际渲染尺寸
+     */
+    function getCakeRect() {
+      const inner = document.querySelector('.cake-inner');
+      if (!inner) return null;
+      return inner.getBoundingClientRect();
+    }
 
-    const extraImages = [
-  { src: 'images/fox2.png', name: 'fox2', scale: 1 },
-  { src: 'images/Q_ghy2.png', name: 'qghy2', scale: 1 },  // 改为 1（50px）
-  { src: 'images/q_hanyu.png', name: 'qhanyu', scale: 1.7 }, // 保持 1.7 倍（85px）
-  { src: 'images/fox.png', name: 'fox', scale: 1 }
-];
+    /**
+     * 将屏幕坐标转换为蛋糕逻辑坐标 (0-CAKE_SIZE)
+     * 这是所有定位的核心函数
+     */
+    function screenToCakeCoords(screenX, screenY) {
+      const rect = getCakeRect();
+      if (!rect) return null;
+      
+      // 考虑页面滚动
+      const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      
+      // 计算相对于蛋糕容器的位置（0-1）
+      const relativeX = (screenX - rect.left) / rect.width;
+      const relativeY = (screenY - rect.top) / rect.height;
+      
+      // 转换为逻辑坐标
+      return {
+        x: relativeX * CAKE_SIZE,
+        y: relativeY * CAKE_SIZE,
+        relativeX: relativeX,
+        relativeY: relativeY
+      };
+    }
 
+    /**
+     * 将蛋糕逻辑坐标转换为CSS left/top值（带单位）
+     */
+    function cakeToCssCoords(cakeX, cakeY) {
+      const percentX = (cakeX / CAKE_SIZE) * 100;
+      const percentY = (cakeY / CAKE_SIZE) * 100;
+      return {
+        left: percentX + '%',
+        top: percentY + '%'
+      };
+    }
+
+    // ==========================================
+    // 工具函数
+    // ==========================================
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -752,89 +829,181 @@
       setTimeout(() => indicator.classList.remove('show'), 2000);
     }
 
+    function getPointerCoords(e) {
+      if (e.touches && e.touches.length > 0) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+      }
+      return { x: e.clientX, y: e.clientY };
+    }
+
+    // 防止iOS双击缩放
+    let lastTapTime = 0;
+    document.addEventListener('touchend', (e) => {
+      const currentTime = new Date().getTime();
+      if (currentTime - lastTapTime < 300) {
+        e.preventDefault();
+      }
+      lastTapTime = currentTime;
+    }, { passive: false });
+
+    // ==========================================
+    // 存档管理
+    // ==========================================
     function saveProgress() {
-      const data = {
-        currentStep,
-        fluffiness,
-        candleCount,
-        hasLitCandle,
-        html: document.getElementById('decorationsLayer').innerHTML,
-        timestamp: new Date().toLocaleString()
-      };
-      localStorage.setItem('cakeProgress', JSON.stringify(data));
-      showSaveIndicator();
+      try {
+        const decorData = decorations.map(d => ({
+          step: d.step,
+          type: d.type,
+          x: d.x, // 保存逻辑坐标 (0-512)
+          y: d.y,
+          src: d.src,
+          emoji: d.emoji,
+          scale: d.scale,
+          rotation: d.rotation,
+          className: d.className
+        }));
+
+        const data = {
+          currentStep,
+          fluffiness,
+          candleCount,
+          hasLitCandle,
+          decorations: decorData,
+          timestamp: new Date().toISOString(),
+          version: 3 // 新版本号
+        };
+        localStorage.setItem('cakeProgress_v3', JSON.stringify(data));
+        showSaveIndicator();
+      } catch(e) {
+        console.log('保存失败', e);
+      }
     }
 
     function loadProgress() {
-      const saved = localStorage.getItem('cakeProgress');
-      if (saved) {
+      try {
+        const saved = localStorage.getItem('cakeProgress_v3');
+        if (!saved) {
+          showToast('没有找到保存的记录');
+          return;
+        }
+
         const data = JSON.parse(saved);
-        currentStep = data.currentStep;
+        if (data.version !== 3) {
+          showToast('存档版本不兼容');
+          return;
+        }
+
+        currentStep = data.currentStep || 0;
         fluffiness = data.fluffiness || 0;
         candleCount = data.candleCount || 0;
         hasLitCandle = data.hasLitCandle || false;
 
-        if (data.html) {
-          document.getElementById('decorationsLayer').innerHTML = data.html;
-          rebindDecorations();
+        document.getElementById('decorationsLayer').innerHTML = '';
+        decorations = [];
+
+        if (data.decorations && Array.isArray(data.decorations)) {
+          data.decorations.forEach(d => restoreDecoration(d));
         }
 
         updateStep();
+        if (hasLitCandle) applyCandleAmbiance();
 
-        if (hasLitCandle) {
-          applyCandleAmbiance();
-        }
-
-        showToast(`已恢复 ${data.timestamp} 的制作进度`);
+        const date = new Date(data.timestamp);
+        showToast(`已恢复 ${date.getMonth()+1}/${date.getDate()} 的制作进度`);
         document.getElementById('continueBtn').style.display = 'none';
+      } catch(e) {
+        console.log('加载失败', e);
+        showToast('加载失败');
       }
     }
 
-    function rebindDecorations() {
-      decorations = [];
-      const decorEls = document.getElementById('decorationsLayer').children;
-      for (let el of decorEls) {
-        let step = 0;
-        if (el.classList.contains('cream-flower')) step = 1;
-        else if (el.classList.contains('static-fruit')) step = 2;
-        else if (el.classList.contains('candle')) step = 3;
-        else if (el.classList.contains('decoration-emoji') || el.classList.contains('decoration-img')) step = 5;
-        decorations.push({ step, el });
+    function restoreDecoration(data) {
+      const decorLayer = document.getElementById('decorationsLayer');
+      const coords = cakeToCssCoords(data.x, data.y);
+      let el;
+
+      if (data.type === 'cream') {
+        el = document.createElement('div');
+        el.className = 'cream-flower';
+        el.innerHTML = '<img src="images/cream.png" alt="cream">';
+        el.style.left = coords.left;
+        el.style.top = coords.top;
+      } else if (data.type === 'fruit') {
+        el = document.createElement('div');
+        el.className = data.className || 'static-fruit';
+        el.innerHTML = `<img src="${data.src}" alt="fruit">`;
+        el.style.left = coords.left;
+        el.style.top = coords.top;
+        if (data.rotation) {
+          setTimeout(() => { el.style.transform = `rotate(${data.rotation}deg)`; }, 10);
+        }
+      } else if (data.type === 'candle') {
+        el = document.createElement('div');
+        el.className = data.className?.includes('lit') ? 'candle lit' : 'candle';
+        el.innerHTML = '<img src="images/candle.png" alt="candle">';
+        el.style.left = coords.left;
+        el.style.top = coords.top;
+      } else if (data.type === 'emoji') {
+        el = document.createElement('div');
+        el.className = 'decoration-emoji';
+        el.textContent = data.emoji;
+        el.style.left = coords.left;
+        el.style.top = coords.top;
+      } else if (data.type === 'image') {
+        el = document.createElement('img');
+        el.className = 'decoration-img';
+        if (data.className) {
+          data.className.split(' ').forEach(c => { if(c) el.classList.add(c); });
+        }
+        el.src = data.src;
+        el.style.left = coords.left;
+        el.style.top = coords.top;
+      }
+
+      if (el) {
+        decorLayer.appendChild(el);
+        decorations.push({...data, el});
       }
     }
 
     function checkSavedProgress() {
-      const saved = localStorage.getItem('cakeProgress');
-      if (saved) {
-        document.getElementById('continueBtn').style.display = 'block';
-      }
+      try {
+        const saved = localStorage.getItem('cakeProgress_v3');
+        if (saved) {
+          document.getElementById('continueBtn').style.display = 'block';
+        }
+      } catch(e) {}
     }
 
+    // ==========================================
+    // UI控制
+    // ==========================================
     function applyCandleAmbiance() {
       document.getElementById('makeStage').classList.add('candle-lit');
       document.getElementById('workPanel').classList.add('candle-glow');
-      document.getElementById('cakeArea').classList.add('candle-ambiance');
     }
 
     function removeCandleAmbiance() {
       document.getElementById('makeStage').classList.remove('candle-lit');
       document.getElementById('workPanel').classList.remove('candle-glow');
-      document.getElementById('cakeArea').classList.remove('candle-ambiance');
     }
 
-    function showFluffPopupWithMessage(x, y, message) {
+    function showFluffPopup(cakeX, cakeY, message) {
       const popup = document.createElement('div');
       popup.className = 'fluff-popup';
       popup.textContent = message;
-      popup.style.left = x + 'px';
-      popup.style.top = y + 'px';
-      document.getElementById('cakeArea').appendChild(popup);
+      const coords = cakeToCssCoords(cakeX, cakeY);
+      popup.style.left = coords.left;
+      popup.style.top = coords.top;
+      document.querySelector('.cake-inner').appendChild(popup);
       setTimeout(() => popup.remove(), 1000);
     }
 
     function updateStep() {
       const step = steps[currentStep];
-
+      
       document.querySelectorAll('.step-dot').forEach((dot, idx) => {
         dot.className = 'step-dot' + (idx < currentStep ? ' completed' : '') + (idx === currentStep ? ' active' : '');
       });
@@ -844,8 +1013,7 @@
       document.getElementById('guideText').textContent = step.guideText;
       document.getElementById('instruction').textContent = step.instruction;
 
-      const pbar = document.getElementById('progressBar');
-      pbar.style.display = step.hasProgress ? 'block' : 'none';
+      document.getElementById('progressBar').style.display = step.hasProgress ? 'block' : 'none';
       updateProgressDisplay();
 
       setupStepInteraction();
@@ -870,363 +1038,9 @@
       }
 
       if (step.clearCream) {
-        clearCreamTraces();
+        document.querySelectorAll('.cream-flower').forEach(el => el.remove());
+        decorations = decorations.filter(d => d.type !== 'cream');
       }
-    }
-
-    function clearCreamTraces() {
-      const decorLayer = document.getElementById('decorationsLayer');
-      const creams = decorLayer.querySelectorAll('.cream-flower');
-      creams.forEach(cream => cream.remove());
-      decorations = decorations.filter(d => d.step !== 1);
-    }
-
-    function setupStepInteraction() {
-      const cakeArea = document.getElementById('cakeArea');
-      const workImage = document.getElementById('workImage');
-      const decorLayer = document.getElementById('decorationsLayer');
-      const step = steps[currentStep];
-
-      cakeArea.onmousedown = null;
-      cakeArea.onmousemove = null;
-      cakeArea.onmouseup = null;
-      cakeArea.onmouseleave = null;
-      cakeArea.onclick = null;
-      cakeArea.ontouchstart = null;
-      cakeArea.ontouchmove = null;
-      cakeArea.ontouchend = null;
-
-      cakeArea.classList.remove('fluff-cursor');
-      cakeArea.style.cursor = 'default';
-
-      if (step.action === 'fluff') {
-        let pressing = false;
-        let interval;
-        let lastMsgIndex = -1;
-
-        cakeArea.classList.add('fluff-cursor');
-
-        const startFluff = (e) => {
-          e.preventDefault();
-          pressing = true;
-          workImage.style.transform = 'scale(0.95, 1.05)';
-
-          AudioManager.playFluff();
-
-          const rect = cakeArea.getBoundingClientRect();
-          const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-          const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-          const x = clientX - rect.left;
-          const y = clientY - rect.top;
-
-          let msgIndex;
-          do {
-            msgIndex = Math.floor(Math.random() * fluffMessages.length);
-          } while (msgIndex === lastMsgIndex && fluffMessages.length > 1);
-          lastMsgIndex = msgIndex;
-
-          showFluffPopupWithMessage(x - 40, y - 40, fluffMessages[msgIndex]);
-
-          interval = setInterval(() => {
-            if (fluffiness < 50) {
-              fluffiness = Math.min(fluffiness + 2, 50);
-              updateProgressDisplay();
-
-              if (fluffiness % 5 === 0 && fluffiness < 50) {
-                AudioManager.playFluff();
-                let newMsgIndex;
-                do {
-                  newMsgIndex = Math.floor(Math.random() * fluffMessages.length);
-                } while (newMsgIndex === lastMsgIndex);
-                lastMsgIndex = newMsgIndex;
-                showFluffPopupWithMessage(x - 40 + (Math.random() * 20 - 10), y - 40 + (Math.random() * 20 - 10), fluffMessages[newMsgIndex]);
-              }
-            }
-
-            if (fluffiness >= 50) {
-              clearInterval(interval);
-              showToast('蛋糕已经很蓬松了！');
-              saveProgress();
-              setTimeout(nextStep, 500);
-            }
-          }, 100);
-        };
-
-        const endFluff = () => {
-          pressing = false;
-          clearInterval(interval);
-          workImage.style.transform = 'scale(1)';
-        };
-
-        cakeArea.onmousedown = startFluff;
-        cakeArea.ontouchstart = startFluff;
-        cakeArea.onmouseup = endFluff;
-        cakeArea.onmouseleave = endFluff;
-        cakeArea.ontouchend = endFluff;
-      }
-
-      else if (step.action === 'cream') {
-        cakeArea.style.cursor = 'crosshair';
-        let lastX = 0;
-        let lastY = 0;
-        let isPressed = false;
-
-        const addCreamAt = (x, y) => {
-          AudioManager.playFluff();
-
-          const cream = document.createElement('div');
-          cream.className = 'cream-flower';
-          cream.innerHTML = `<img src="images/cream.png" alt="cream">`;
-          cream.style.left = (x - 48) + 'px';
-          cream.style.top = (y - 48) + 'px';
-
-          const speed = Math.min(10, Math.abs(x - lastX) + Math.abs(y - lastY));
-          const scale = 0.9 + Math.random() * 0.2 - (speed * 0.01);
-          const rotation = (Math.random() - 0.5) * 30 * (speed / 5);
-          cream.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
-
-          decorLayer.appendChild(cream);
-          trackDecoration(cream);
-
-          const creams = decorLayer.querySelectorAll('.cream-flower');
-          if (creams.length % 10 === 0) {
-            saveProgress();
-          }
-
-          if (creams.length > 200) {
-            creams[0].remove();
-          }
-        };
-
-        cakeArea.onmousedown = (e) => {
-          e.preventDefault();
-          isPressed = true;
-          const rect = cakeArea.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          lastX = x;
-          lastY = y;
-          addCreamAt(x, y);
-        };
-
-        cakeArea.onmousemove = (e) => {
-          if (!isPressed) return;
-          e.preventDefault();
-
-          const rect = cakeArea.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          const dx = x - lastX;
-          const dy = y - lastY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance > 10) {
-            const steps = Math.ceil(distance / 10);
-
-            for (let i = 0; i < steps; i++) {
-              const t = (i + 1) / steps;
-              const ix = lastX + dx * t;
-              const iy = lastY + dy * t;
-              addCreamAt(ix, iy);
-            }
-
-            lastX = x;
-            lastY = y;
-          }
-        };
-
-        const stopDrawing = () => {
-          if (isPressed) {
-            isPressed = false;
-            saveProgress();
-          }
-        };
-
-        cakeArea.onmouseup = stopDrawing;
-        cakeArea.onmouseleave = stopDrawing;
-
-        cakeArea.ontouchstart = (e) => {
-          e.preventDefault();
-          isPressed = true;
-          const touch = e.touches[0];
-          const rect = cakeArea.getBoundingClientRect();
-          const x = touch.clientX - rect.left;
-          const y = touch.clientY - rect.top;
-          lastX = x;
-          lastY = y;
-          addCreamAt(x, y);
-        };
-
-        cakeArea.ontouchmove = (e) => {
-          e.preventDefault();
-          if (!isPressed) return;
-
-          const touch = e.touches[0];
-          const rect = cakeArea.getBoundingClientRect();
-          const x = touch.clientX - rect.left;
-          const y = touch.clientY - rect.top;
-
-          const dx = x - lastX;
-          const dy = y - lastY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance > 10) {
-            const steps = Math.ceil(distance / 10);
-            for (let i = 0; i < steps; i++) {
-              const t = (i + 1) / steps;
-              const ix = lastX + dx * t;
-              const iy = lastY + dy * t;
-              addCreamAt(ix, iy);
-            }
-            lastX = x;
-            lastY = y;
-          }
-        };
-
-        cakeArea.ontouchend = stopDrawing;
-      }
-
-      else if (step.action === 'fruit') {
-        cakeArea.style.cursor = 'copy';
-        let count = 0;
-
-        cakeArea.onclick = (e) => {
-          AudioManager.playFruit();
-
-          const rect = cakeArea.getBoundingClientRect();
-          const fruit = document.createElement('div');
-          fruit.className = 'static-fruit';
-
-          const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
-          fruit.innerHTML = `<img src="${randomFruit}" alt="fruit">`;
-
-          let offset = 15;
-          if (randomFruit.includes('strawberry')) {
-            fruit.classList.add('strawberry');
-            offset = 19.5;
-          } else {
-            fruit.classList.add('medium');
-            offset = 24;
-          }
-
-          fruit.style.left = (e.clientX - rect.left - offset) + 'px';
-          fruit.style.top = (e.clientY - rect.top - offset) + 'px';
-
-          const rotation = Math.random() * 360;
-          setTimeout(() => {
-            fruit.style.transform = `rotate(${rotation}deg)`;
-          }, 500);
-
-          decorLayer.appendChild(fruit);
-          trackDecoration(fruit);
-          count++;
-          updateProgressDisplay(count, 10);
-
-          saveProgress();
-        };
-      }
-
-      else if (step.action === 'candle') {
-        cakeArea.style.cursor = 'pointer';
-        candleCount = 0;
-        updateProgressDisplay(0, 5);
-
-        cakeArea.onclick = (e) => {
-          if (candleCount >= 5) {
-            showToast('最多只能插5根蜡烛！');
-            return;
-          }
-          const rect = cakeArea.getBoundingClientRect();
-          const candle = document.createElement('div');
-          candle.className = 'candle';
-          candle.innerHTML = `<img src="images/candle.png" alt="candle">`;
-          candle.style.left = (e.clientX - rect.left - 24) + 'px';
-          candle.style.top = (e.clientY - rect.top - 48) + 'px';
-          decorLayer.appendChild(candle);
-          trackDecoration(candle);
-          candleCount++;
-          updateProgressDisplay(candleCount, 5);
-
-          saveProgress();
-
-          if (candleCount === 5) {
-            showToast('蜡烛插满了，准备点燃！');
-            setTimeout(nextStep, 800);
-          }
-        };
-      }
-
-      else if (step.action === 'light') {
-        cakeArea.style.cursor = 'pointer';
-
-        cakeArea.onclick = (e) => {
-          const rect = cakeArea.getBoundingClientRect();
-          const clickX = e.clientX - rect.left;
-          const clickY = e.clientY - rect.top;
-
-          const candles = decorLayer.querySelectorAll('.candle:not(.lit)');
-          if (candles.length === 0 && candleCount > 0) {
-            nextStep();
-            return;
-          }
-
-          let litNew = false;
-          candles.forEach(candle => {
-            const cx = parseFloat(candle.style.left) + 24;
-            const cy = parseFloat(candle.style.top) + 24;
-            if (Math.hypot(clickX - cx, clickY - cy) < 60) {
-              if (!candle.classList.contains('lit')) {
-                candle.classList.add('lit');
-                litNew = true;
-
-                AudioManager.playFluff();
-
-                for (let i = 0; i < 6; i++) {
-                  const spark = document.createElement('div');
-                  spark.style.cssText = `position: absolute; left: ${cx}px; top: ${cy}px; width: 4px; height: 4px; background: #ffd93d; border-radius: 50%; pointer-events: none; z-index: 30;`;
-                  decorLayer.appendChild(spark);
-                  const angle = (Math.PI * 2 / 6) * i;
-                  const dist = 30;
-                  spark.animate([
-                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                    { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }
-                  ], { duration: 600, easing: 'ease-out' }).onfinish = () => spark.remove();
-                }
-              }
-            }
-          });
-
-          if (litNew && !hasLitCandle) {
-            hasLitCandle = true;
-            applyCandleAmbiance();
-            saveProgress();
-          }
-
-          const remaining = decorLayer.querySelectorAll('.candle:not(.lit)').length;
-          if (remaining === 0 && candleCount > 0) {
-            showToast('✨ 全部点燃了！');
-            setTimeout(nextStep, 1000);
-          }
-        };
-      }
-    }
-
-    function trackDecoration(el) {
-      decorations.push({ step: currentStep, el: el });
-    }
-
-    function undoLast() {
-      for (let i = decorations.length - 1; i >= 0; i--) {
-        if (decorations[i].step === currentStep) {
-          decorations[i].el.remove();
-          decorations.splice(i, 1);
-          showToast('已撤销');
-          saveProgress();
-          return;
-        }
-      }
-      showToast('没有可撤销的');
     }
 
     function updateProgressDisplay(current, max) {
@@ -1238,161 +1052,403 @@
       }
     }
 
+    // ==========================================
+    // 交互设置（核心修复部分）
+    // ==========================================
+    function setupStepInteraction() {
+      const cakeArea = document.getElementById('cakeArea');
+      const step = steps[currentStep];
+
+      // 清除旧事件（通过克隆）
+      const newArea = cakeArea.cloneNode(true);
+      cakeArea.parentNode.replaceChild(newArea, cakeArea);
+
+      // 重新获取引用
+      const freshArea = document.getElementById('cakeArea');
+      
+      // 恢复装饰层内容
+      const decorLayer = freshArea.querySelector('.decorations-layer');
+      decorations.forEach(d => {
+        if (!d.el.parentNode) decorLayer.appendChild(d.el);
+      });
+
+      if (step.action === 'fluff') setupFluff(freshArea);
+      else if (step.action === 'cream') setupCream(freshArea);
+      else if (step.action === 'fruit') setupFruit(freshArea);
+      else if (step.action === 'candle') setupCandle(freshArea);
+      else if (step.action === 'light') setupLight(freshArea);
+    }
+
+    function setupFluff(cakeArea) {
+      let pressing = false;
+      let interval;
+      let workImage = cakeArea.querySelector('.cake-base-img');
+
+      const start = (e) => {
+        e.preventDefault();
+        if (pressing) return;
+        pressing = true;
+        workImage.style.transform = 'scale(0.95, 1.05)';
+
+        const coords = getPointerCoords(e);
+        const cakeCoords = screenToCakeCoords(coords.x, coords.y);
+        if (!cakeCoords) return;
+
+        showFluffPopup(cakeCoords.x, cakeCoords.y, fluffMessages[Math.floor(Math.random() * fluffMessages.length)]);
+
+        interval = setInterval(() => {
+          if (fluffiness < 50) {
+            fluffiness = Math.min(fluffiness + 2, 50);
+            updateProgressDisplay();
+            if (fluffiness >= 50) {
+              clearInterval(interval);
+              showToast('蛋糕已经很蓬松了！');
+              saveProgress();
+              setTimeout(nextStep, 500);
+            }
+          }
+        }, 100);
+      };
+
+      const end = () => {
+        pressing = false;
+        clearInterval(interval);
+        workImage.style.transform = 'scale(1)';
+      };
+
+      cakeArea.addEventListener('mousedown', start, {passive: false});
+      cakeArea.addEventListener('touchstart', start, {passive: false});
+      cakeArea.addEventListener('mouseup', end);
+      cakeArea.addEventListener('mouseleave', end);
+      cakeArea.addEventListener('touchend', end);
+    }
+
+    function setupCream(cakeArea) {
+      const decorLayer = cakeArea.querySelector('.decorations-layer');
+      let isPressed = false;
+      let lastCakeX = 0, lastCakeY = 0;
+
+      const addCream = (cakeX, cakeY) => {
+        const coords = cakeToCssCoords(cakeX, cakeY);
+        const cream = document.createElement('div');
+        cream.className = 'cream-flower';
+        cream.innerHTML = '<img src="images/cream.png" alt="cream">';
+        cream.style.left = coords.left;
+        cream.style.top = coords.top;
+        
+        const scale = 0.8 + Math.random() * 0.4;
+        cream.style.transform = `scale(${scale}) rotate(${Math.random()*360}deg)`;
+        
+        decorLayer.appendChild(cream);
+        decorations.push({ step: currentStep, type: 'cream', x: cakeX, y: cakeY, el: cream });
+      };
+
+      const start = (e) => {
+        e.preventDefault();
+        isPressed = true;
+        const coords = getPointerCoords(e);
+        const cakeCoords = screenToCakeCoords(coords.x, coords.y);
+        if (cakeCoords) {
+          lastCakeX = cakeCoords.x;
+          lastCakeY = cakeCoords.y;
+          addCream(cakeCoords.x, cakeCoords.y);
+        }
+      };
+
+      const move = (e) => {
+        if (!isPressed) return;
+        e.preventDefault();
+        const coords = getPointerCoords(e);
+        const cakeCoords = screenToCakeCoords(coords.x, coords.y);
+        if (!cakeCoords) return;
+
+        const dist = Math.hypot(cakeCoords.x - lastCakeX, cakeCoords.y - lastCakeY);
+        if (dist > 10) {
+          const steps = Math.ceil(dist / 10);
+          for (let i = 1; i <= steps; i++) {
+            const t = i / steps;
+            addCream(lastCakeX + (cakeCoords.x - lastCakeX) * t, lastCakeY + (cakeCoords.y - lastCakeY) * t);
+          }
+          lastCakeX = cakeCoords.x;
+          lastCakeY = cakeCoords.y;
+        }
+      };
+
+      const end = () => {
+        if (isPressed) {
+          isPressed = false;
+          saveProgress();
+        }
+      };
+
+      cakeArea.addEventListener('mousedown', start, {passive: false});
+      cakeArea.addEventListener('mousemove', move, {passive: false});
+      cakeArea.addEventListener('mouseup', end);
+      cakeArea.addEventListener('mouseleave', end);
+      cakeArea.addEventListener('touchstart', start, {passive: false});
+      cakeArea.addEventListener('touchmove', move, {passive: false});
+      cakeArea.addEventListener('touchend', end);
+    }
+
+    function setupFruit(cakeArea) {
+      const decorLayer = cakeArea.querySelector('.decorations-layer');
+      
+      const handle = (e) => {
+        e.preventDefault();
+        const coords = getPointerCoords(e);
+        const cakeCoords = screenToCakeCoords(coords.x, coords.y);
+        if (!cakeCoords) return;
+
+        const fruit = document.createElement('div');
+        const randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
+        fruit.innerHTML = `<img src="${randomFruit}" alt="fruit">`;
+        
+        let className = 'static-fruit';
+        if (randomFruit.includes('strawberry')) className += ' strawberry';
+        else className += ' medium';
+        fruit.className = className;
+
+        const cssCoords = cakeToCssCoords(cakeCoords.x, cakeCoords.y);
+        fruit.style.left = cssCoords.left;
+        fruit.style.top = cssCoords.top;
+
+        const rotation = Math.random() * 360;
+        setTimeout(() => { fruit.style.transform = `rotate(${rotation}deg)`; }, 50);
+
+        decorLayer.appendChild(fruit);
+        decorations.push({
+          step: currentStep,
+          type: 'fruit',
+          x: cakeCoords.x,
+          y: cakeCoords.y,
+          src: randomFruit,
+          rotation: rotation,
+          className: className,
+          el: fruit
+        });
+
+        const count = decorations.filter(d => d.type === 'fruit').length;
+        updateProgressDisplay(count, 10);
+        if (count % 3 === 0) saveProgress();
+      };
+
+      cakeArea.addEventListener('click', handle);
+      cakeArea.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handle(e);
+      }, {passive: false});
+    }
+
+    function setupCandle(cakeArea) {
+      const decorLayer = cakeArea.querySelector('.decorations-layer');
+      candleCount = 0;
+      updateProgressDisplay(0, 5);
+
+      const handle = (e) => {
+        e.preventDefault();
+        if (candleCount >= 5) {
+          showToast('最多只能插5根蜡烛！');
+          return;
+        }
+
+        const coords = getPointerCoords(e);
+        const cakeCoords = screenToCakeCoords(coords.x, coords.y);
+        if (!cakeCoords) return;
+
+        const candle = document.createElement('div');
+        candle.className = 'candle';
+        candle.innerHTML = '<img src="images/candle.png" alt="candle">';
+        
+        const cssCoords = cakeToCssCoords(cakeCoords.x, cakeCoords.y);
+        candle.style.left = cssCoords.left;
+        candle.style.top = cssCoords.top;
+
+        decorLayer.appendChild(candle);
+        decorations.push({
+          step: currentStep,
+          type: 'candle',
+          x: cakeCoords.x,
+          y: cakeCoords.y,
+          el: candle
+        });
+
+        candleCount++;
+        updateProgressDisplay(candleCount, 5);
+        saveProgress();
+
+        if (candleCount === 5) {
+          showToast('蜡烛插满了，准备点燃！');
+          setTimeout(nextStep, 800);
+        }
+      };
+
+      cakeArea.addEventListener('click', handle);
+      cakeArea.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handle(e);
+      }, {passive: false});
+    }
+
+    function setupLight(cakeArea) {
+      const decorLayer = cakeArea.querySelector('.decorations-layer');
+
+      const handle = (e) => {
+        e.preventDefault();
+        const coords = getPointerCoords(e);
+        const cakeCoords = screenToCakeCoords(coords.x, coords.y);
+        if (!cakeCoords) return;
+
+        const candles = decorLayer.querySelectorAll('.candle:not(.lit)');
+        if (candles.length === 0 && candleCount > 0) {
+          nextStep();
+          return;
+        }
+
+        let litNew = false;
+        candles.forEach(candle => {
+          // 解析蜡烛的逻辑坐标
+          const decorData = decorations.find(d => d.el === candle);
+          if (!decorData) return;
+          
+          const dist = Math.hypot(cakeCoords.x - decorData.x, cakeCoords.y - decorData.y);
+          if (dist < 40) { // 40px逻辑距离
+            candle.classList.add('lit');
+            decorData.className = 'candle lit';
+            litNew = true;
+          }
+        });
+
+        if (litNew && !hasLitCandle) {
+          hasLitCandle = true;
+          applyCandleAmbiance();
+          saveProgress();
+        }
+
+        if (decorLayer.querySelectorAll('.candle:not(.lit)').length === 0 && candleCount > 0) {
+          showToast('✨ 全部点燃了！');
+          setTimeout(nextStep, 1000);
+        }
+      };
+
+      cakeArea.addEventListener('click', handle);
+      cakeArea.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handle(e);
+      }, {passive: false});
+    }
+
+    // ==========================================
+    // 装饰面板
+    // ==========================================
     function createEmojiPalette() {
       const palette = document.getElementById('emojiPalette');
       palette.innerHTML = '';
 
-      extraImages.forEach(imgData => {
-        const item = document.createElement('div');
-        item.className = 'emoji-item';
-        const img = document.createElement('img');
-        img.src = imgData.src;
-        img.alt = imgData.name;
-        img.style.width = '40px';
-        img.style.height = '40px';
-        img.style.objectFit = 'contain';
-        item.appendChild(img);
-
-        item.onmouseenter = (e) => showHoverPreview(e, imgData.src, 'image');
-        item.onmouseleave = hideHoverPreview;
-
-        setupDrag(item, imgData.src, 'image', imgData.scale || 1);
-        palette.appendChild(item);
-      });
-
-      emojis.forEach(emoji => {
-        const item = document.createElement('div');
-        item.className = 'emoji-item';
-        item.textContent = emoji;
-
-        item.onmouseenter = (e) => showHoverPreview(e, emoji, 'emoji');
-        item.onmouseleave = hideHoverPreview;
-
-        setupDrag(item, emoji, 'emoji', 1);
-        palette.appendChild(item);
-      });
-    }
-
-    function showHoverPreview(e, content, type) {
-      const preview = document.getElementById('hoverPreview');
-      if (type === 'emoji') {
-        preview.textContent = content;
-        preview.innerHTML = content;
-      } else {
-        preview.innerHTML = `<img src="${content}" style="width:50px;height:50px;">`;
-      }
-      preview.style.display = 'block';
-      preview.style.left = e.clientX + 'px';
-      preview.style.top = e.clientY + 'px';
-    }
-
-    function hideHoverPreview() {
-      document.getElementById('hoverPreview').style.display = 'none';
-    }
-
-    document.addEventListener('mousemove', (e) => {
-      const preview = document.getElementById('hoverPreview');
-      if (preview.style.display === 'block') {
-        preview.style.left = e.clientX + 'px';
-        preview.style.top = e.clientY + 'px';
-      }
-    });
-
-    function setupDrag(item, content, type, scale = 1) {
-      const startDrag = (x, y) => {
-        hideHoverPreview();
-
-        const ghost = document.createElement('div');
-        ghost.className = 'dragging-ghost';
-
-        // 根据图片类型添加对应类名以应用正确的尺寸
-        if (content.includes('q_hanyu')) {
-          ghost.classList.add('qhanyu-large');
-        } else if (content.includes('Q_ghy2')) {
-          ghost.classList.add('qghy2');
-        }
-
-        if (type === 'emoji') {
-          ghost.textContent = content;
-          ghost.style.fontSize = '36px';
+      [...extraImages, ...emojis.map(e => ({emoji: e, isEmoji: true}))].forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'emoji-item';
+        
+        if (item.isEmoji) {
+          div.textContent = item.emoji;
         } else {
-          ghost.innerHTML = `<img src="${content}" style="width:${50 * scale}px;height:${50 * scale}px;object-fit:contain;">`;
+          div.innerHTML = `<img src="${item.src}" alt="${item.name}">`;
         }
-        ghost.style.left = x + 'px';
-        ghost.style.top = y + 'px';
-        document.body.appendChild(ghost);
 
-        const move = (e) => {
-          const cx = e.clientX || (e.touches?.[0]?.clientX);
-          const cy = e.clientY || (e.touches?.[0]?.clientY);
-          if (cx !== undefined) {
-            ghost.style.left = cx + 'px';
-            ghost.style.top = cy + 'px';
+        const startDrag = (e) => {
+          e.preventDefault();
+          const startCoords = getPointerCoords(e);
+          
+          // 创建拖拽幽灵
+          const ghost = document.createElement('div');
+          ghost.style.cssText = `
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            left: ${startCoords.x}px;
+            top: ${startCoords.y}px;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+          `;
+          if (item.isEmoji) {
+            ghost.textContent = item.emoji;
+          } else {
+            const size = item.scale === 1.7 ? 85 : 50;
+            ghost.innerHTML = `<img src="${item.src}" style="width:${size}px;height:${size}px;">`;
           }
-        };
+          document.body.appendChild(ghost);
 
-        const end = (e) => {
-          const cx = e.clientX || (e.changedTouches?.[0]?.clientX);
-          const cy = e.clientY || (e.changedTouches?.[0]?.clientY);
-          const cakeRect = document.getElementById('cakeArea').getBoundingClientRect();
+          const move = (e) => {
+            const coords = getPointerCoords(e);
+            ghost.style.left = coords.x + 'px';
+            ghost.style.top = coords.y + 'px';
+          };
 
-          if (cx >= cakeRect.left && cx <= cakeRect.right && cy >= cakeRect.top && cy <= cakeRect.bottom) {
-            AudioManager.playFruit();
+          const end = (e) => {
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', end);
+            document.removeEventListener('touchmove', move);
+            document.removeEventListener('touchend', end);
 
-            if (type === 'emoji') {
-              const decor = document.createElement('div');
-              decor.className = 'decoration-emoji';
-              decor.textContent = content;
-              decor.style.left = (cx - cakeRect.left - 14) + 'px';
-              decor.style.top = (cy - cakeRect.top - 14) + 'px';
-              document.getElementById('decorationsLayer').appendChild(decor);
-              trackDecoration(decor);
-            } else {
-              const decor = document.createElement('img');
-              decor.className = 'decoration-img';
+            const endCoords = getPointerCoords(e);
+            const cakeRect = getCakeRect();
+            
+            if (cakeRect && 
+                endCoords.x >= cakeRect.left && endCoords.x <= cakeRect.right &&
+                endCoords.y >= cakeRect.top && endCoords.y <= cakeRect.bottom) {
               
-              // 添加对应类名以应用CSS尺寸
-              if (content.includes('q_hanyu')) {
-                decor.classList.add('qhanyu-large'); // 85px
-              } else if (content.includes('Q_ghy2')) {
-                decor.classList.add('qghy2'); // 25px
+              const cakeCoords = screenToCakeCoords(endCoords.x, endCoords.y);
+              const cssCoords = cakeToCssCoords(cakeCoords.x, cakeCoords.y);
+              const decorLayer = document.querySelector('.decorations-layer');
+              
+              if (item.isEmoji) {
+                const el = document.createElement('div');
+                el.className = 'decoration-emoji';
+                el.textContent = item.emoji;
+                el.style.left = cssCoords.left;
+                el.style.top = cssCoords.top;
+                decorLayer.appendChild(el);
+                decorations.push({step: currentStep, type: 'emoji', x: cakeCoords.x, y: cakeCoords.y, emoji: item.emoji, el});
+              } else {
+                const el = document.createElement('img');
+                el.className = 'decoration-img';
+                if (item.scale === 1.7) el.classList.add('qhanyu-large');
+                el.src = item.src;
+                el.style.left = cssCoords.left;
+                el.style.top = cssCoords.top;
+                decorLayer.appendChild(el);
+                decorations.push({step: currentStep, type: 'image', x: cakeCoords.x, y: cakeCoords.y, src: item.src, scale: item.scale, className: el.className, el});
               }
-              
-              decor.src = content;
-              // 根据scale计算半宽作为偏移量：(50 * scale) / 2
-              const size = (50 * scale) / 2;
-              decor.style.left = (cx - cakeRect.left - size) + 'px';
-              decor.style.top = (cy - cakeRect.top - size) + 'px';
-              document.getElementById('decorationsLayer').appendChild(decor);
-              trackDecoration(decor);
+              saveProgress();
             }
+            ghost.remove();
+          };
 
-            saveProgress();
-          }
-
-          ghost.remove();
-          document.removeEventListener('mousemove', move);
-          document.removeEventListener('mouseup', end);
-          document.removeEventListener('touchmove', move);
-          document.removeEventListener('touchend', end);
+          document.addEventListener('mousemove', move, {passive: false});
+          document.addEventListener('mouseup', end);
+          document.addEventListener('touchmove', move, {passive: false});
+          document.addEventListener('touchend', end);
         };
 
-        document.addEventListener('mousemove', move);
-        document.addEventListener('mouseup', end);
-        document.addEventListener('touchmove', move, {passive: false});
-        document.addEventListener('touchend', end);
-      };
+        div.addEventListener('mousedown', startDrag, {passive: false});
+        div.addEventListener('touchstart', startDrag, {passive: false});
+        palette.appendChild(div);
+      });
+    }
 
-      item.onmousedown = (e) => { 
-        e.preventDefault(); 
-        hideHoverPreview();
-        startDrag(e.clientX, e.clientY); 
-      };
-      item.ontouchstart = (e) => { 
-        e.preventDefault(); 
-        hideHoverPreview();
-        startDrag(e.touches[0].clientX, e.touches[0].clientY); 
-      };
+    // ==========================================
+    // 导航和控制
+    // ==========================================
+    function undoLast() {
+      for (let i = decorations.length - 1; i >= 0; i--) {
+        if (decorations[i].step === currentStep) {
+          decorations[i].el.remove();
+          decorations.splice(i, 1);
+          showToast('已撤销');
+          saveProgress();
+          return;
+        }
+      }
+      showToast('没有可撤销的');
     }
 
     function prevStep() {
@@ -1419,144 +1475,121 @@
         }
         return true;
       });
-
       if (currentStep === 0) fluffiness = 0;
       if (currentStep === 3) candleCount = 0;
       if (currentStep === 4) {
         hasLitCandle = false;
         removeCandleAmbiance();
+        decorations.filter(d => d.type === 'candle').forEach(d => {
+          d.el.classList.remove('lit');
+          d.className = 'candle';
+        });
       }
-
       updateStep();
       saveProgress();
       showToast('已重置当前步骤');
     }
 
-   function finish() {
-  document.getElementById('makeStage').style.display = 'none';
-  document.getElementById('resultPage').style.display = 'block';
+    // ==========================================
+    // 完成函数（确保结果页完全一致）
+    // ==========================================
+    function finish() {
+      document.getElementById('makeStage').style.display = 'none';
+      document.getElementById('resultPage').style.display = 'block';
+      
+      try {
+        localStorage.removeItem('cakeProgress_v3');
+      } catch(e) {}
 
-  localStorage.removeItem('cakeProgress');
+      const playerCake = document.getElementById('playerCake');
+      playerCake.innerHTML = '';
 
-  try {
-    AudioManager.bg.play().catch(e => {});
-  } catch(e) {}
+      // 创建与制作时完全相同的结构
+      const container = document.createElement('div');
+      container.className = 'result-cake-inner';
+      
+      // 底图
+      const baseImg = document.createElement('img');
+      baseImg.src = steps[currentStep].work;
+      baseImg.className = 'cake-base-img';
+      baseImg.alt = '蛋糕';
+      container.appendChild(baseImg);
 
-  const playerCake = document.getElementById('playerCake');
-  playerCake.innerHTML = '';
-  
-  // 获取原始元素
-  const cakeArea = document.getElementById('cakeArea');
-  const workImage = document.getElementById('workImage');
-  const decorLayer = document.getElementById('decorationsLayer');
-  
-  // 关键：获取当前步骤对应的底图路径（确保使用当前步骤的正确图片）
-  const currentStepWork = steps[currentStep].work;
-  
-  // 创建新容器，保持与制作页面完全相同的尺寸
-  const container = document.createElement('div');
-  container.style.cssText = `
-    position: relative;
-    width: 350px;
-    height: 350px;
-    margin: 0 auto;
-    background: rgba(255,255,255,0.5);
-    border-radius: 16px;
-    overflow: visible;
-  `;
-  
-  // 创建底图 - 使用当前步骤的配置，确保图片正确加载
-  const baseImg = document.createElement('img');
-  // 关键修复：使用 steps 数组中当前步骤的 work 图片，而不是可能已变更的 workImage.src
-  baseImg.src = currentStepWork;
-  baseImg.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 16px;
-    z-index: 1;
-    display: block;
-  `;
-  // 确保图片加载完成后再添加装饰
-  baseImg.onload = function() {
-    console.log('底图加载成功:', currentStepWork);
-  };
-  baseImg.onerror = function() {
-    console.error('底图加载失败:', currentStepWork);
-    // 如果失败，尝试使用 workImage 的当前 src
-    baseImg.src = workImage.src;
-  };
-  container.appendChild(baseImg);
-  
-  // 克隆装饰层 - 关键：保持所有绝对定位坐标不变
-  const decorClone = document.createElement('div');
-  decorClone.style.cssText = `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-  `;
-  
-  // 逐个复制装饰元素，保持原始位置和尺寸
-  Array.from(decorLayer.children).forEach(child => {
-    const clone = child.cloneNode(true);
-    
-    // 确保克隆的元素保持原有定位和尺寸
-    const computedStyle = window.getComputedStyle(child);
-    clone.style.position = 'absolute';
-    clone.style.left = child.style.left;
-    clone.style.top = child.style.top;
-    clone.style.width = child.style.width || computedStyle.width;
-    clone.style.height = child.style.height || computedStyle.height;
-    clone.style.transform = child.style.transform;
-    clone.style.zIndex = computedStyle.zIndex;
-    
-    // 清理交互事件
-    clone.onmousedown = null;
-    clone.onmousemove = null;
-    clone.onmouseup = null;
-    clone.onclick = null;
-    clone.onmouseleave = null;
-    clone.ontouchstart = null;
-    clone.ontouchmove = null;
-    clone.ontouchend = null;
-    clone.style.cursor = 'default';
-    clone.style.pointerEvents = 'none';
-    
-    // 停止蜡烛动画但保留发光
-    if (clone.classList.contains('candle') && clone.classList.contains('lit')) {
-      clone.style.animation = 'none';
-      clone.style.filter = 'drop-shadow(0 0 8px #ff6b35) drop-shadow(0 0 16px #ffd93d)';
+      // 装饰层 - 使用相同的坐标系统
+      const decorLayer = document.createElement('div');
+      decorLayer.className = 'decorations-layer';
+
+      decorations.forEach(d => {
+        const coords = cakeToCssCoords(d.x, d.y);
+        let clone;
+        
+        if (d.type === 'cream') {
+          clone = document.createElement('div');
+          clone.className = 'cream-flower';
+          clone.innerHTML = '<img src="images/cream.png" alt="cream">';
+        } else if (d.type === 'fruit') {
+          clone = document.createElement('div');
+          clone.className = d.className || 'static-fruit';
+          clone.innerHTML = `<img src="${d.src}" alt="fruit">`;
+          if (d.rotation) clone.style.transform = `rotate(${d.rotation}deg)`;
+        } else if (d.type === 'candle') {
+          clone = document.createElement('div');
+          clone.className = d.className || 'candle';
+          clone.innerHTML = '<img src="images/candle.png" alt="candle">';
+          if (clone.classList.contains('lit')) {
+            clone.style.animation = 'none';
+            clone.style.filter = 'drop-shadow(0 0 8px #ff6b35)';
+          }
+        } else if (d.type === 'emoji') {
+          clone = document.createElement('div');
+          clone.className = 'decoration-emoji';
+          clone.textContent = d.emoji;
+        } else if (d.type === 'image') {
+          clone = document.createElement('img');
+          clone.className = 'decoration-img';
+          if (d.className) d.className.split(' ').forEach(c => { if(c) clone.classList.add(c); });
+          clone.src = d.src;
+        }
+
+        if (clone) {
+          clone.style.left = coords.left;
+          clone.style.top = coords.top;
+          clone.style.position = 'absolute';
+          clone.style.pointerEvents = 'none';
+          decorLayer.appendChild(clone);
+        }
+      });
+
+      container.appendChild(decorLayer);
+      playerCake.appendChild(container);
+
+      // 庆祝动画
+      const celebration = document.getElementById('celebration');
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const c = document.createElement('div');
+          c.className = 'confetti';
+          c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
+          c.style.left = Math.random() * 100 + 'vw';
+          c.style.animationDuration = (3 + Math.random() * 2) + 's';
+          celebration.appendChild(c);
+          setTimeout(() => c.remove(), 5000);
+        }, i * 30);
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // ==========================================
+    // 初始化
+    // ==========================================
+    document.addEventListener('contextmenu', e => e.preventDefault());
     
-    decorClone.appendChild(clone);
-  });
-  
-  container.appendChild(decorClone);
-  playerCake.appendChild(container);
-
-  // 庆祝动画
-  const celebration = document.getElementById('celebration');
-  for (let i = 0; i < 40; i++) {
-    setTimeout(() => {
-      const c = document.createElement('div');
-      c.className = 'confetti';
-      c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
-      c.style.left = Math.random() * 100 + 'vw';
-      c.style.animationDuration = (3 + Math.random() * 2) + 's';
-      celebration.appendChild(c);
-      setTimeout(() => c.remove(), 5000);
-    }, i * 50);
-  }
-}
-
-    document.addEventListener('contextmenu', event => event.preventDefault());
+    // 防止橡皮筋效果
+    document.body.addEventListener('touchmove', (e) => {
+      if (e.target.closest('.emoji-palette')) return;
+      e.preventDefault();
+    }, { passive: false });
 
     checkSavedProgress();
     updateStep();
