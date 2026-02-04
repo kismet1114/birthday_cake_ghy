@@ -204,6 +204,17 @@
       animation: cakeGlow 1.5s ease-in-out infinite alternate;
     }
 
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    
+    .result-box {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
     @keyframes cakeGlow {
       from { box-shadow: 0 0 40px rgba(255, 140, 40, 0.4), inset 0 0 30px rgba(255, 190, 90, 0.2); }
       to { box-shadow: 0 0 80px rgba(255, 170, 70, 0.7), inset 0 0 50px rgba(255, 210, 130, 0.4); }
@@ -629,18 +640,48 @@
       <button class="btn" onclick="finish()" id="finishBtn" style="display: none;">完成派对！🎉</button>
     </div>
 
-    <div class="result-page" id="resultPage" style="display: none;">
-    <h1 style="text-align: center; color: #d32f2f; font-family: 'ZCOOL KuaiLe', cursive;">✨ 大功告成 ✨</h1>
-    
-    <!-- 只显示样品蛋糕，居中 -->
-    <div style="display: flex; justify-content: center; align-items: center; margin: 30px 0;">
-      <div class="result-box" style="max-width: 500px; width: 90%;">
-        <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 10px; font-size: 18px;">✨ 完美成品参考</div>
-        <div style="position: relative; width: 100%; height: 350px; background: #fff9fc; border-radius: 16px;">
-          <img src="images/6.jpg" alt="成品" style="width: 100%; height: 100%; object-fit: contain; border-radius: 16px;">
+      <div class="result-page" id="resultPage" style="display: none;">
+    <div class="main-container" style="max-width: 800px; margin: 0 auto; text-align: center;">
+      <h1 style="color: #d32f2f; font-family: 'ZCOOL KuaiLe', cursive; font-size: 42px; margin-bottom: 20px; animation: fadeIn 1s;">
+        ✨ 大功告成 ✨
+      </h1>
+      
+      <!-- 装饰性副标题 -->
+      <div style="font-size: 18px; color: #e91e63; margin-bottom: 30px; font-family: 'ZCOOL KuaiLe', cursive; animation: fadeIn 1.2s;">
+        🎂 奶糕的生日派对蛋糕制作完成！🎂
+      </div>
+      
+      <!-- 成品蛋糕展示 -->
+      <div class="result-box" style="max-width: 500px; margin: 0 auto 30px; background: white; border-radius: 24px; padding: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.15); animation: fadeIn 1.4s;">
+        <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 15px; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+          <span>✨</span>
+          <span>完美成品参考</span>
+          <span>✨</span>
+        </div>
+        <div style="position: relative; width: 100%; height: 380px; background: linear-gradient(135deg, #fff9fc, #fff0f5); border-radius: 20px; overflow: hidden; border: 3px solid rgba(255, 182, 193, 0.5);">
+          <img src="images/6.jpg" alt="成品" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
+          <!-- 闪光装饰 -->
+          <div style="position: absolute; top: 10px; right: 10px; font-size: 24px; animation: twinkle 2s infinite;">✨</div>
+          <div style="position: absolute; bottom: 10px; left: 10px; font-size: 24px; animation: twinkle 2s infinite 0.5s;">🎀</div>
+          <div style="position: absolute; top: 10px; left: 10px; font-size: 24px; animation: twinkle 2s infinite 1s;">💖</div>
         </div>
       </div>
+      
+      <!-- 祝福语 -->
+      <div class="final-message" style="font-size: 36px; margin: 30px 0; font-family: 'ZCOOL KuaiLe', cursive; background: linear-gradient(45deg, #ff6b6b, #f9ca24, #ff9ff3, #ff6b6b); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 3s ease infinite, fadeIn 1.6s;">
+        🎉 生日快乐！🎂
+      </div>
+      
+      <!-- 额外装饰文字 -->
+      <div style="color: #666; font-size: 16px; margin-bottom: 25px; animation: fadeIn 1.8s;">
+        感谢你的用心制作，奶糕的生日蛋糕充满甜蜜与欢乐
+      </div>
+      
+      <div class="button-group" style="animation: fadeIn 2s;">
+        <button class="btn" onclick="location.reload()" style="font-size: 18px; padding: 15px 40px;">再做一个 🔄</button>
+      </div>
     </div>
+  </div>
     
     <div class="final-message">生日快乐！🎂</div>
     <div class="button-group">
@@ -1469,9 +1510,12 @@ function saveCakeImage() {
       showToast('已重置当前步骤');
     }
 
-        function finish() {
+         function finish() {
       document.getElementById('makeStage').style.display = 'none';
       document.getElementById('resultPage').style.display = 'block';
+      
+      // 滚动到顶部
+      window.scrollTo(0, 0);
 
       localStorage.removeItem('cakeProgress');
 
@@ -1479,18 +1523,19 @@ function saveCakeImage() {
         AudioManager.bg.play().catch(e => {});
       } catch(e) {}
 
-      // 庆祝动画
+      // 庆祝动画 - 彩带
       const celebration = document.getElementById('celebration');
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 50; i++) {
         setTimeout(() => {
           const c = document.createElement('div');
           c.className = 'confetti';
-          c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁'][Math.floor(Math.random() * 7)];
+          c.textContent = ['🎀', '🎉', '🎈', '🎁', '🎊', '✨', '🧁', '💖', '🍰'][Math.floor(Math.random() * 9)];
           c.style.left = Math.random() * 100 + 'vw';
+          c.style.fontSize = (20 + Math.random() * 20) + 'px';
           c.style.animationDuration = (3 + Math.random() * 2) + 's';
           celebration.appendChild(c);
           setTimeout(() => c.remove(), 5000);
-        }, i * 50);
+        }, i * 80);
       }
     }
 
@@ -1501,6 +1546,7 @@ function saveCakeImage() {
   </script>
 </body>
 </html>
+
 
 
 
