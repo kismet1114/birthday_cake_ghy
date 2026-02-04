@@ -677,18 +677,14 @@
       <button class="btn" onclick="finish()" id="finishBtn" style="display: none;">完成派对！🎉</button>
     </div>
 
-        <div class="result-page" id="resultPage">
-    <div class="result-content">
-      <h1 style="color: #d32f2f; font-family: 'ZCOOL KuaiLe', cursive; font-size: 36px; text-align: center; margin-bottom: 15px;">
+         <div class="result-page" id="resultPage" style="display: none;">
+    <div class="main-container" style="max-width: 600px; margin: 0 auto; text-align: center; padding: 30px;">
+      <h1 style="color: #d32f2f; font-family: 'ZCOOL KuaiLe', cursive; font-size: 32px; margin-bottom: 20px;">
         ✨ 大功告成 ✨
       </h1>
       
-      <div style="text-align: center; color: #e91e63; font-size: 16px; margin-bottom: 25px; font-family: 'ZCOOL KuaiLe', cursive;">
-        🎂 奶糕的生日派对蛋糕制作完成！🎂
-      </div>
-      
       <!-- 样品蛋糕展示 -->
-      <div style="max-width: 450px; margin: 0 auto 25px; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center;">
+      <div class="result-box" style="max-width: 450px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
         <div style="font-family: 'ZCOOL KuaiLe', cursive; color: #e91e63; margin-bottom: 15px; font-size: 18px;">
           ✨ 完美成品参考 ✨
         </div>
@@ -700,6 +696,8 @@
           <div style="position: absolute; top: 15px; left: 15px; font-size: 24px; animation: twinkle 2s infinite 1.2s;">💖</div>
         </div>
       </div>
+    </div>
+  </div>
       
       <!-- 祝福语 -->
       <div style="text-align: center; font-size: 32px; margin: 25px 0; font-family: 'ZCOOL KuaiLe', cursive; background: linear-gradient(45deg, #ff6b6b, #f9ca24, #ff9ff3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 3s ease infinite;">
@@ -722,12 +720,7 @@
     </div>
   </div>
     
-    <div class="final-message">生日快乐！🎂</div>
-    <div class="button-group">
-      <button class="btn" onclick="location.reload()">再做一个 🔄</button>
-    </div>
-  </div>
-
+    
   <div class="celebration" id="celebration"></div>
   <div class="toast" id="toast"></div>
   <div class="save-indicator" id="saveIndicator">💾 已自动保存</div>
@@ -1603,6 +1596,7 @@ function saveCakeImage() {
   </script>
 </body>
 </html>
+
 
 
 
